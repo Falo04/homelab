@@ -37,7 +37,7 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.email=felixwallner0@gmail.com"
       - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/letsencrypt.json"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
-      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=300"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=5"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=8.8.8.8:53"
       # Providers
       - "--providers.docker=true"
