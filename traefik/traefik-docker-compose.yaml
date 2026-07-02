@@ -1,0 +1,89 @@
+services:
+  traefik:
+    image: traefik:v3.7
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - acme:/etc/traefik/acme
+      - traefik:/config
+      - cloudflare:/cloudflare
+    command:
+      # EntryPoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls=true"
+      # Lets encrypt setup
+      - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
+      - "--entrypoints.webinternal.address=:82"
+      - "--certificatesresolvers.letsencrypt.acme.email=felixwallner0@gmail.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/letsencrypt.json"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=300"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=8.8.8.8:53"
+      # Attach the static configuration tls.yaml file that contains the tls configuration settings
+      - "--providers.file.filename=/dynamic/tls.yaml"
+      # Providers
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=internal"
+      # API & Dashboard
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+      # Observability
+      - "--log.level=INFO"
+      - "--accesslog=true"
+      - "--metrics.prometheus=true"
+    # Traefik Dynamic configuration via Docker labels
+    labels:
+      # Enable self‑routing
+      - "traefik.enable=true"
+      # Dashboard router
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${ROOT_DOMAIN}`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.tls=true"
+    secrets:
+      - cf_token
+    environment:
+      - CLOUDFLARE_DNS_API_TOKEN_FILE=/run/secrets/cf_token
+      - CLOUDFLARE_HTTP_TIMEOUT=${HTTP_TIMEOUT}
+      - CLOUDFLARE_POLLING_INTERVAL=${POLLING_INTERVAL}
+      - CLOUDFLARE_PROPAGATION_TIMEOUT=${PROPAGATION_TIMEOUT}
+      - CLOUDFLARE_TTL=${TTL}
+
+  # Whoami application
+  whoami:
+    image: traefik/whoami
+    container_name: whoami
+    restart: unless-stopped
+    networks:
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.${ROOT_DOMAIN}`)"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.tls=true"
+
+networks:
+  internal:
+    external: true
+
+volumes:
+  acme:
+  traefik:
+  cloudflare:
+
+secrets:
+  cf_token:
+    path: cloudflare-token.txt
