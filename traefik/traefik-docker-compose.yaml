@@ -13,7 +13,7 @@ services:
       # HTTP → redirects to https on tsadmin (:8443)
       - "${TAILSCALE_IP}:80:80"
       # tsadmin: the only TLS entrypoint, serving all internal services
-      - "${TAILSCALE_IP}:8443:8443"
+      - "${TAILSCALE_IP}:443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - acme:/etc/traefik/acme
@@ -27,12 +27,9 @@ services:
       - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
       # Tailscale-only entrypoint (published only on the Tailscale IP) — the sole
       # TLS entrypoint; every service is reachable exclusively over the tailnet.
-      - "--entrypoints.tsadmin.address=:8443"
+      - "--entrypoints.tsadmin.address=:443"
       - "--entrypoints.tsadmin.http.tls=true"
       - "--entrypoints.tsadmin.http.tls.certresolver=letsencrypt"
-      # Internal wildcard cert for every *.int.felixwallner.com host on this entrypoint
-      - "--entrypoints.tsadmin.http.tls.domains[0].main=${INT_ROOT_DOMAIN}"
-      - "--entrypoints.tsadmin.http.tls.domains[0].sans=*.${INT_ROOT_DOMAIN}"
       - "--certificatesresolvers.letsencrypt.acme.email=felixwallner0@gmail.com"
       - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/letsencrypt.json"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
@@ -59,6 +56,12 @@ services:
       - "traefik.http.routers.dashboard.entrypoints=tsadmin"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.tls=true"
+      # Cert resolver + wildcard must be on the router — a docker router's tls=true
+      # does NOT inherit the entrypoint's certResolver. This obtains the single
+      # *.int wildcard, which the shared cert store then serves for whoami/vault too.
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.tls.domains[0].main=${INT_ROOT_DOMAIN}"
+      - "traefik.http.routers.dashboard.tls.domains[0].sans=*.${INT_ROOT_DOMAIN}"
     secrets:
       - cf_token
     environment:
