@@ -8,8 +8,12 @@ services:
     networks:
       - internal
     ports:
+      # Public: web + websecure listen on every interface (LAN/public/tailnet)
       - "80:80"
       - "443:443"
+      # Admin: the tsadmin entrypoint (:8443) is published ONLY on the Tailscale
+      # IP, so the dashboard is reachable exclusively over the tailnet.
+      - "${TAILSCALE_IP}:8443:8443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - acme:/etc/traefik/acme
@@ -26,13 +30,15 @@ services:
       # Lets encrypt setup
       - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
       - "--entrypoints.webinternal.address=:82"
+      # Tailscale-only admin entrypoint (published only on the Tailscale IP)
+      - "--entrypoints.tsadmin.address=:8443"
+      - "--entrypoints.tsadmin.http.tls=true"
+      - "--entrypoints.tsadmin.http.tls.certresolver=letsencrypt"
       - "--certificatesresolvers.letsencrypt.acme.email=felixwallner0@gmail.com"
       - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/letsencrypt.json"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=300"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=8.8.8.8:53"
-      # Attach the static configuration tls.yaml file that contains the tls configuration settings
-      - "--providers.file.filename=/dynamic/tls.yaml"
       # Providers
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
@@ -48,9 +54,10 @@ services:
     labels:
       # Enable self‑routing
       - "traefik.enable=true"
-      # Dashboard router
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.${ROOT_DOMAIN}`)"
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      # Dashboard router — bound to the tsadmin entrypoint, which only listens
+      # on the Tailscale IP, so the dashboard is reachable only over the tailnet.
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${INT_ROOT_DOMAIN}`)"
+      - "traefik.http.routers.dashboard.entrypoints=tsadmin"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.tls=true"
     secrets:
@@ -71,8 +78,8 @@ services:
       - internal
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.${ROOT_DOMAIN}`)"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.${INT_ROOT_DOMAIN}`)"
+      - "traefik.http.routers.whoami.entrypoints=tsadmin"
       - "traefik.http.routers.whoami.tls=true"
 
 networks:

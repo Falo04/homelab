@@ -19,6 +19,10 @@ Two env files are loaded by the justfile.
 
 ```env
 ROOT_DOMAIN=example.com
+INT_ROOT_DOMAIN=int.example.com
+# Tailscale IP of this host — Traefik publishes its ports only on this address.
+# Find it with: tailscale ip -4
+TAILSCALE_IP=100.x.x.x
 ```
 
 ### `traefik/enviromnet.env` (Cloudflare/ACME tuning)
@@ -78,19 +82,23 @@ configure auto-unseal).
 
 ## 5. Access
 
-Once certs are issued (the first issuance can take a few minutes due to the
-DNS-01 propagation delay), the services are reachable at:
+Traefik exposes two kinds of entrypoints, split by which interface each Docker
+port is published on:
 
-- `https://traefik.${ROOT_DOMAIN}` — Traefik dashboard
-- `https://whoami.${ROOT_DOMAIN}` — test service
-- `https://vault.${ROOT_DOMAIN}` — Vault UI
+| Entrypoint  | Container port | Published on          | Reachable from      |
+| ----------- | -------------- | --------------------- | ------------------- |
+| `web`       | `:80`          | all interfaces        | anywhere (→ HTTPS)  |
+| `websecure` | `:443`         | all interfaces        | anywhere            |
+| `tsadmin`   | `:8443`        | `${TAILSCALE_IP}` only | tailnet only        |
 
-## Notes
+DNS must resolve `traefik.${ROOT_DOMAIN}` to this host's Tailscale IP (via
+MagicDNS or a split-DNS record); the public hostnames resolve to the public/LAN
+IP as usual. Certs work regardless because ACME uses **DNS-01** (no inbound
+ports needed).
 
-- HTTP (`:80`) is permanently redirected to HTTPS (`:443`).
-- Certificates are stored in the `acme` Docker volume (`letsencrypt.json`).
-- Vault data lives in `vault-cluster/vault1/data` (Raft storage) and listens
-  internally on `http://vault:8200` with TLS disabled — TLS is terminated at
-  Traefik.
-- If the first cert issuance fails, check `just logs traefik` for Cloudflare
-  auth errors (usually a bad or under-scoped token).
+Verify the binds on the host — `:8443` should show the Tailscale IP, while
+`:443` shows `0.0.0.0`:
+
+```bash
+ss -tlnp | grep -E ':(80|443|8443)'
+```
