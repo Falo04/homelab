@@ -1,0 +1,23 @@
+services:
+  vault:
+    image: hashicorp/vault:1.13.3
+    container_name: vault
+    hostname: vault
+    command: server
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./vault1/config.hcl:/vault/config/config.hcl
+      - ./vault1/data:/vault/data
+    networks:
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vault.rule=Host(`vault.${ROOT_DOMAIN}`)"
+      - "traefik.http.routers.vault.entrypoints=websecure"
+      - "traefik.http.routers.vault.tls=true"
+      - "traefik.http.services.vault.loadbalancer.server.port=8200"
+
+networks:
+  internal:
+    external: true
