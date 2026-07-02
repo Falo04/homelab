@@ -29,11 +29,17 @@ services:
       - "--entrypoints.websecure.http.tls=true"
       # Lets encrypt setup
       - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
+      # Public wildcard cert for every *.felixwallner.com host on this entrypoint
+      - "--entrypoints.websecure.http.tls.domains[0].main=${ROOT_DOMAIN}"
+      - "--entrypoints.websecure.http.tls.domains[0].sans=*.${ROOT_DOMAIN}"
       - "--entrypoints.webinternal.address=:82"
       # Tailscale-only admin entrypoint (published only on the Tailscale IP)
       - "--entrypoints.tsadmin.address=:8443"
       - "--entrypoints.tsadmin.http.tls=true"
       - "--entrypoints.tsadmin.http.tls.certresolver=letsencrypt"
+      # Internal wildcard cert for every *.int.felixwallner.com host on this entrypoint
+      - "--entrypoints.tsadmin.http.tls.domains[0].main=${INT_ROOT_DOMAIN}"
+      - "--entrypoints.tsadmin.http.tls.domains[0].sans=*.${INT_ROOT_DOMAIN}"
       - "--certificatesresolvers.letsencrypt.acme.email=felixwallner0@gmail.com"
       - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/letsencrypt.json"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
