@@ -82,23 +82,27 @@ configure auto-unseal).
 
 ## 5. Access
 
-Traefik exposes entrypoints split by which interface each Docker port is
-published on, and each entrypoint serves its own domain:
+Every service is **Tailscale-only** — Traefik publishes its ports exclusively on
+the Tailscale IP, so nothing listens on LAN/public interfaces:
 
-| Entrypoint  | Container port | Published on           | Reachable from     | Domain                    |
-| ----------- | -------------- | ---------------------- | ------------------ | ------------------------- |
-| `web`       | `:80`          | all interfaces         | anywhere (→ HTTPS) | —                         |
-| `websecure` | `:443`         | all interfaces         | anywhere           | `*.${ROOT_DOMAIN}`        |
-| `tsadmin`   | `:8443`        | `${TAILSCALE_IP}` only | tailnet only       | `*.${INT_ROOT_DOMAIN}`    |
+| Entrypoint | Container port | Published on           | Reachable from | Domain                 |
+| ---------- | -------------- | ---------------------- | -------------- | ---------------------- |
+| `web`      | `:80`          | `${TAILSCALE_IP}` only | tailnet only   | redirects → `:8443`    |
+| `tsadmin`  | `:8443`        | `${TAILSCALE_IP}` only | tailnet only   | `*.${INT_ROOT_DOMAIN}` |
 
-`websecure` is reserved for anything you want reachable publicly under
-`*.${ROOT_DOMAIN}`; it currently has no routers.
+Services (from a Tailscale-connected device — note the `:8443` port):
 
-Verify the binds on the host — `:8443` should show the Tailscale IP, while
-`:443` shows `0.0.0.0`:
+- `https://traefik.${INT_ROOT_DOMAIN}:8443` — Traefik dashboard
+- `https://whoami.${INT_ROOT_DOMAIN}:8443` — test service
+- `https://vault.${INT_ROOT_DOMAIN}:8443` — Vault UI
+
+`http://…` on `:80` permanently redirects to `https://…:8443`.
+
+Verify the binds on the host — both `:80` and `:8443` should show the Tailscale
+IP, and nothing on `0.0.0.0`:
 
 ```bash
-ss -tlnp | grep -E ':(80|443|8443)'
+ss -tlnp | grep -E ':(80|8443)'
 ```
 
 ## 6. DNS
@@ -107,10 +111,9 @@ ACME uses **DNS-01**, so no inbound ports are needed for certificates — the
 Cloudflare token lets Traefik create the `_acme-challenge` TXT records itself.
 You only add the records clients use to reach the services:
 
-| Name (in the zone) | Type | Value                       | Cloudflare proxy    |
-| ------------------ | ---- | --------------------------- | ------------------- |
-| `*.int`            | A    | `${TAILSCALE_IP}`           | **DNS only (grey)** |
-| `*` (public hosts) | A    | your public/LAN IP          | your choice         |
+| Name (in the zone) | Type | Value             | Cloudflare proxy    |
+| ------------------ | ---- | ----------------- | ------------------- |
+| `*.int`            | A    | `${TAILSCALE_IP}` | **DNS only (grey)** |
 
 - Internal hosts (`*.int.${ROOT_DOMAIN}`) resolve to the **Tailscale IP**. This
   is a public DNS record pointing at a private `100.x` address — off-tailnet
@@ -122,11 +125,10 @@ You only add the records clients use to reach the services:
 
 ## 7. Certificates (wildcard)
 
-Each entrypoint obtains a **single wildcard certificate** via DNS-01, rather
-than one cert per hostname:
+The `tsadmin` entrypoint obtains a **single wildcard certificate** via DNS-01,
+covering every internal host rather than one cert per hostname:
 
 - `tsadmin` → `*.${INT_ROOT_DOMAIN}`
-- `websecure` → `*.${ROOT_DOMAIN}`
 
 Why wildcard here:
 
