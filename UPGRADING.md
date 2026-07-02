@@ -80,9 +80,9 @@ editing the tag, not by pulling `latest`.
 
 ## Vault
 
-Vault is currently on `latest`, which is convenient but risky — an upgrade can
-happen unexpectedly on `just pull`, and **Vault does not support downgrades**.
-Consider pinning a version (e.g. `hashicorp/vault:1.20`).
+Vault is pinned to `1.13.3`. Keep it pinned — **Vault does not support
+downgrades**, so an unexpected `latest` bump on `just pull` is a foot-gun.
+Upgrade by editing the tag deliberately.
 
 ### Important: Vault upgrade rules
 

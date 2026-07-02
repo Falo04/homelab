@@ -86,4 +86,4 @@ volumes:
 
 secrets:
   cf_token:
-    path: cloudflare-token.txt
+    file: cloudflare-token.txt

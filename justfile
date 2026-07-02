@@ -16,7 +16,7 @@ _dc stack:
     set -euo pipefail
     case "{{stack}}" in
       traefik) echo "docker compose -f traefik/traefik-docker-compose.yaml --env-file .env --env-file traefik/enviromnet.env" ;;
-      vault)   echo "docker compose -f vault-cluster/docker-compose.yml --env-file .env" ;;
+      vault)   echo "docker compose -f vault/docker-compose.yml --env-file .env" ;;
       *) echo "unknown stack: {{stack}} (expected: traefik, vault)" >&2; exit 1 ;;
     esac
 
@@ -26,7 +26,7 @@ _stacks stack="all":
     set -euo pipefail
     if [ "{{stack}}" = "all" ]; then echo "{{stacks}}"; else echo "{{stack}}"; fi
 
-# Ensure the external `internal` network the vault-cluster expects exists
+# Ensure the external `internal` network the vault expects exists
 ensure-net:
     @docker network inspect internal >/dev/null 2>&1 || docker network create internal
 
