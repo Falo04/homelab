@@ -14,6 +14,14 @@ services:
       # the justfile `ensure-net` recipe.
       external:
         ipv4_address: 172.30.0.2
+        # cloudflared resolves the tunnel's Service URL via Docker's embedded DNS.
+        # Aliasing Traefik as vault.${ROOT_DOMAIN} means a Service URL of
+        # `https://vault.${ROOT_DOMAIN}:8443` resolves here (not the public tunnel),
+        # and cloudflared sends that as SNI — so Traefik serves the matching
+        # Let's Encrypt cert and cloudflared verifies it without any origin TLS
+        # overrides in the (minimal) tunnel dashboard.
+        aliases:
+          - "vault.${ROOT_DOMAIN}"
     # Only tsadmin (:443) and web (:80) are published on the host, and only on the
     # Tailscale IP — nothing listens on LAN/public interfaces. The websecure
     # entrypoint is NOT published; it binds solely to the external-network IP, so

@@ -33,10 +33,13 @@ POLLING_INTERVAL=5
 PROPAGATION_TIMEOUT=600
 TTL=120
 LOG_LEVEL=INFO
+# Cloudflare tunnel token (secret) — powers the cloudflared container.
+TUNNEL_TOKEN=your-tunnel-token
 ```
 
-> These files contain no secrets, but `.env` is gitignored anyway. Copy the
-> snippets above and adjust the values for your setup.
+> Both `.env` and `traefik/enviromnet.env` are gitignored — the latter now holds
+> the `TUNNEL_TOKEN` secret. Copy the snippets above and adjust the values for
+> your setup.
 
 ## 2. Provide the Cloudflare token
 
