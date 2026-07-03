@@ -1,6 +1,6 @@
 # Secrets
-.env
+*.env
 traefik/cloudflare-token.txt
 
 # Vault data (Raft storage + unseal state)
-vault-cluster/vault1/data/
+vault/vault1/data/
