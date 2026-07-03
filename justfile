@@ -28,10 +28,12 @@ _stacks stack="all":
 
 # Ensure the shared networks exist: `internal` (Tailscale-exposed services) and
 # `external` (Cloudflare-tunnel-exposed services). The external subnet is fixed so
-# Traefik can bind the websecure entrypoint to a static IP on it.
+# Traefik can bind the websecure entrypoint to a static IP (172.30.0.2). The
+# --ip-range keeps Docker's dynamic pool in the upper half (.128–.254) so other
+# containers (e.g. cloudflared) can't grab .2 before Traefik claims it.
 ensure-net:
     @docker network inspect internal >/dev/null 2>&1 || docker network create internal
-    @docker network inspect external >/dev/null 2>&1 || docker network create --subnet 172.30.0.0/24 external
+    @docker network inspect external >/dev/null 2>&1 || docker network create --subnet 172.30.0.0/24 --ip-range 172.30.0.128/25 external
 
 # Start stack(s) in the background (creates the shared network first)
 up stack="all": ensure-net

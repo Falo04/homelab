@@ -99,8 +99,9 @@ services:
 networks:
   internal:
     external: true
-  # Created (with the 172.30.0.0/24 subnet the static IP lives in) by the
-  # justfile `ensure-net` recipe.
+  # Created by the justfile `ensure-net` recipe: subnet 172.30.0.0/24 with the
+  # dynamic pool restricted to .128–.254, leaving 172.30.0.2 free for Traefik's
+  # static bind above.
   external:
     external: true
 
