@@ -10,14 +10,20 @@ services:
       - ./vault1/config.hcl:/vault/config/config.hcl
       - ./vault1/data:/vault/data
     networks:
-      - internal
+      - external
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.vault.rule=Host(`vault.${INT_ROOT_DOMAIN}`)"
-      - "traefik.http.routers.vault.entrypoints=tsadmin"
+      # Vault is published via the Cloudflare tunnel, so Traefik must reach its
+      # backend over the external network (overrides the global docker provider
+      # network default of `internal`).
+      - "traefik.docker.network=external"
+      - "traefik.http.routers.vault.rule=Host(`vault.${ROOT_DOMAIN}`)"
+      - "traefik.http.routers.vault.entrypoints=websecure"
       - "traefik.http.routers.vault.tls=true"
+      # No wildcard — per-host cert for vault.${ROOT_DOMAIN} via DNS-01.
+      - "traefik.http.routers.vault.tls.certresolver=letsencrypt"
       - "traefik.http.services.vault.loadbalancer.server.port=8200"
 
 networks:
-  internal:
+  external:
     external: true

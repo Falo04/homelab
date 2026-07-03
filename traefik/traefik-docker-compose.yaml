@@ -6,9 +6,19 @@ services:
     security_opt:
       - no-new-privileges:true
     networks:
-      - internal
-    # Everything is published ONLY on the Tailscale IP — nothing listens on
-    # LAN/public interfaces. ACME uses DNS-01, so no inbound ports are needed.
+      # Tailscale-exposed services are routed over this network via tsadmin.
+      internal: {}
+      # Cloudflare-tunnel-exposed services are routed over this network via
+      # websecure. Traefik gets a fixed IP here so websecure can bind to exactly
+      # this address — see the entrypoint below. Must match the subnet created by
+      # the justfile `ensure-net` recipe.
+      external:
+        ipv4_address: 172.30.0.2
+    # Only tsadmin (:443) and web (:80) are published on the host, and only on the
+    # Tailscale IP — nothing listens on LAN/public interfaces. The websecure
+    # entrypoint is NOT published; it binds solely to the external-network IP, so
+    # only the cloudflared tunnel can reach it. ACME uses DNS-01, so no inbound
+    # ports are needed.
     ports:
       # HTTP → redirects to https on tsadmin (:8443)
       - "${TAILSCALE_IP}:80:80"
@@ -30,6 +40,13 @@ services:
       - "--entrypoints.tsadmin.address=:443"
       - "--entrypoints.tsadmin.http.tls=true"
       - "--entrypoints.tsadmin.http.tls.certresolver=letsencrypt"
+      # Cloudflare-tunnel-only entrypoint. Bound to Traefik's fixed IP on the
+      # external network (not :443/0.0.0.0), so it listens ONLY on the tunnel-
+      # facing interface — a call to the host/LAN/Tailscale IP is refused. The
+      # cloudflared container (same external network) is the only client.
+      - "--entrypoints.websecure.address=172.30.0.2:8443"
+      - "--entrypoints.websecure.http.tls=true"
+      - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
       - "--certificatesresolvers.letsencrypt.acme.email=felixwallner0@gmail.com"
       - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/letsencrypt.json"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
@@ -56,12 +73,10 @@ services:
       - "traefik.http.routers.dashboard.entrypoints=tsadmin"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.tls=true"
-      # Cert resolver + wildcard must be on the router — a docker router's tls=true
-      # does NOT inherit the entrypoint's certResolver. This obtains the single
-      # *.int wildcard, which the shared cert store then serves for whoami/vault too.
+      # Cert resolver must be on the router — a docker router's tls=true does NOT
+      # inherit the entrypoint's certResolver. No wildcard: Traefik issues a
+      # per-host cert for traefik.${INT_ROOT_DOMAIN} straight from the Host rule.
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.dashboard.tls.domains[0].main=${INT_ROOT_DOMAIN}"
-      - "traefik.http.routers.dashboard.tls.domains[0].sans=*.${INT_ROOT_DOMAIN}"
     secrets:
       - cf_token
     environment:
@@ -71,21 +86,22 @@ services:
       - CLOUDFLARE_PROPAGATION_TIMEOUT=${PROPAGATION_TIMEOUT}
       - CLOUDFLARE_TTL=${TTL}
 
-  # Whoami application
-  whoami:
-    image: traefik/whoami
-    container_name: whoami
+  tunnel:
+    container_name: cloudflared-tunnel
+    image: cloudflare/cloudflared
     restart: unless-stopped
+    command: tunnel run
     networks:
-      - internal
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.${INT_ROOT_DOMAIN}`)"
-      - "traefik.http.routers.whoami.entrypoints=tsadmin"
-      - "traefik.http.routers.whoami.tls=true"
+      - external
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
 
 networks:
   internal:
+    external: true
+  # Created (with the 172.30.0.0/24 subnet the static IP lives in) by the
+  # justfile `ensure-net` recipe.
+  external:
     external: true
 
 volumes:

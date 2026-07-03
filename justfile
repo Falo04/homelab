@@ -26,9 +26,12 @@ _stacks stack="all":
     set -euo pipefail
     if [ "{{stack}}" = "all" ]; then echo "{{stacks}}"; else echo "{{stack}}"; fi
 
-# Ensure the external `internal` network the vault expects exists
+# Ensure the shared networks exist: `internal` (Tailscale-exposed services) and
+# `external` (Cloudflare-tunnel-exposed services). The external subnet is fixed so
+# Traefik can bind the websecure entrypoint to a static IP on it.
 ensure-net:
     @docker network inspect internal >/dev/null 2>&1 || docker network create internal
+    @docker network inspect external >/dev/null 2>&1 || docker network create --subnet 172.30.0.0/24 external
 
 # Start stack(s) in the background (creates the shared network first)
 up stack="all": ensure-net
