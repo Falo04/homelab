@@ -1,0 +1,25 @@
+services:
+  vault:
+    image: hashicorp/vault:1.13.3
+    container_name: vault
+    hostname: vault
+    command: server
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./vault1/config.hcl:/vault/config/config.hcl
+      - ./vault1/data:/vault/data
+
+  # Cloudflare tunnel — publishes Vault to the internet. The tunnel's public
+  # hostname (configured in the Cloudflare dashboard) forwards to http://vault:8200;
+  # cloudflared reaches Vault by name over this stack's default compose network.
+  # Cloudflare's edge terminates public TLS, so no cert/reverse-proxy is needed here.
+  tunnel:
+    container_name: cloudflared-tunnel
+    image: cloudflare/cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    depends_on:
+      - vault
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}

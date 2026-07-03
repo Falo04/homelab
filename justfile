@@ -1,10 +1,10 @@
 # Homelab compose management
-# Usage: `just <recipe> [stack]`  where stack is one of: traefik, vault, all (default)
+# Usage: `just <recipe> [stack]`  where stack is one of: vault, all (default)
 
 set shell := ["bash", "-uc"]
 
 # List of every managed stack
-stacks := "traefik vault"
+stacks := "vault"
 
 # Default recipe: show the available commands
 default:
@@ -15,9 +15,8 @@ _dc stack:
     #!/usr/bin/env bash
     set -euo pipefail
     case "{{stack}}" in
-      traefik) echo "docker compose -f traefik/traefik-docker-compose.yaml --env-file .env --env-file traefik/enviromnet.env" ;;
-      vault)   echo "docker compose -f vault/docker-compose.yml --env-file .env" ;;
-      *) echo "unknown stack: {{stack}} (expected: traefik, vault)" >&2; exit 1 ;;
+      vault)   echo "docker compose -f docker-compose.yml --env-file .env" ;;
+      *) echo "unknown stack: {{stack}} (expected: vault)" >&2; exit 1 ;;
     esac
 
 # Expand "all" into the full stack list, otherwise echo the single stack back
@@ -26,17 +25,8 @@ _stacks stack="all":
     set -euo pipefail
     if [ "{{stack}}" = "all" ]; then echo "{{stacks}}"; else echo "{{stack}}"; fi
 
-# Ensure the shared networks exist: `internal` (Tailscale-exposed services) and
-# `external` (Cloudflare-tunnel-exposed services). The external subnet is fixed so
-# Traefik can bind the websecure entrypoint to a static IP (172.30.0.2). The
-# --ip-range keeps Docker's dynamic pool in the upper half (.128–.254) so other
-# containers (e.g. cloudflared) can't grab .2 before Traefik claims it.
-ensure-net:
-    @docker network inspect internal >/dev/null 2>&1 || docker network create internal
-    @docker network inspect external >/dev/null 2>&1 || docker network create --subnet 172.30.0.0/24 --ip-range 172.30.0.128/25 external
-
-# Start stack(s) in the background (creates the shared network first)
-up stack="all": ensure-net
+# Start stack(s) in the background
+up stack="all":
     #!/usr/bin/env bash
     set -euo pipefail
     for s in $(just _stacks {{stack}}); do
