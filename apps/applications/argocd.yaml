@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  project: infra-apps-project
+  sources:
+    - repoUrl: https://argoproj.github.io/argo-helm
+      chart: argo-cd
+      targetRevision: 10.1.2
+      helm:
+        releaseName: argocd
+        vaules: |
+          fullnameOverride: argocd
+
+          global:
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 999
+              fsGroup: 999
+              seccompProfile:
+                type: RuntimeDefault
+
+          server:
+            insecure: true
+
+          configs:
+            cm:
+              url: https://argocd.int.felixwallner.com
+
+    - repoUrl: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: apps/argocd
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automted:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
