@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infra-apps
+  namespace: argocd
+spec:
+  project: infra-apps-project
+  source:
+    repoURL: https://github.com/Falo04/homelab
+    targetRevision: main
+    path: apps/infra/applications
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true

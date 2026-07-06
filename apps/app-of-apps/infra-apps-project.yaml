@@ -1,0 +1,10 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infra-apps-project
+  namespace: argocd
+spec:
+  description: "All infra apps"
+  sourceRepos:
+    - https://github.com/Falo04/homelab
+    - https://argoproj.github.io/argo-helm
