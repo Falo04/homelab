@@ -6,5 +6,5 @@ metadata:
 spec:
   description: "All infra apps"
   sourceRepos:
-    - https://github.com/Falo04/homelab
+    - https://github.com/Falo04/homelab.git
     - https://argoproj.github.io/argo-helm
