@@ -1,102 +1,40 @@
-# Homelab compose management
-# Usage: `just <recipe> [stack]`  where stack is one of: vault, all (default)
+# Homelab compose management (Traefik + Vault)
+# Usage: `just <recipe>` — run `just` with no args to list recipes
 
-set shell := ["bash", "-uc"]
-
-# List of every managed stack
-stacks := "vault"
+# docker compose invocation used by every recipe
+dc := "docker compose -f docker-compose.yml --env-file .env"
 
 # Default recipe: show the available commands
 default:
     @just --list
 
-# Resolve the `docker compose ...` invocation for a given stack
-_dc stack:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    case "{{stack}}" in
-      vault)   echo "docker compose -f docker-compose.yml --env-file .env" ;;
-      *) echo "unknown stack: {{stack}} (expected: vault)" >&2; exit 1 ;;
-    esac
+# Start the stack in the background
+up:
+    {{dc}} up -d
 
-# Expand "all" into the full stack list, otherwise echo the single stack back
-_stacks stack="all":
-    #!/usr/bin/env bash
-    set -euo pipefail
-    if [ "{{stack}}" = "all" ]; then echo "{{stacks}}"; else echo "{{stack}}"; fi
+# Stop and remove the stack
+down:
+    {{dc}} down
 
-# Start stack(s) in the background
-up stack="all":
-    #!/usr/bin/env bash
-    set -euo pipefail
-    for s in $(just _stacks {{stack}}); do
-      echo "==> up: $s"
-      $(just _dc "$s") up -d
-    done
+# Pull the latest images
+pull:
+    {{dc}} pull
 
-# Stop and remove stack(s)
-down stack="all":
-    #!/usr/bin/env bash
-    set -euo pipefail
-    for s in $(just _stacks {{stack}}); do
-      echo "==> down: $s"
-      $(just _dc "$s") down
-    done
+# Pull latest images and recreate the stack
+update: pull up
 
-# Restart stack(s)
-restart stack="all":
-    #!/usr/bin/env bash
-    set -euo pipefail
-    for s in $(just _stacks {{stack}}); do
-      echo "==> restart: $s"
-      $(just _dc "$s") restart
-    done
+# Follow logs (optionally for a single service, e.g. `just logs vault`)
+logs service="":
+    {{dc}} logs -f --tail=100 {{service}}
 
-# Recreate stack(s) from scratch (down then up)
-recreate stack="all": (down stack) (up stack)
+# Render the fully-resolved compose config
+config:
+    {{dc}} config
 
-# Pull the latest images for stack(s)
-pull stack="all":
-    #!/usr/bin/env bash
-    set -euo pipefail
-    for s in $(just _stacks {{stack}}); do
-      echo "==> pull: $s"
-      $(just _dc "$s") pull
-    done
-
-# Pull latest images and recreate stack(s)
-update stack="all": (pull stack) (up stack)
-
-# Show container status for stack(s)
-ps stack="all":
-    #!/usr/bin/env bash
-    set -euo pipefail
-    for s in $(just _stacks {{stack}}); do
-      echo "==> ps: $s"
-      $(just _dc "$s") ps
-    done
-
-# Follow logs for a single stack (optionally a specific service)
-logs stack service="":
-    $(just _dc {{stack}}) logs -f --tail=100 {{service}}
-
-# Render the fully-resolved compose config for a stack
-config stack:
-    $(just _dc {{stack}}) config
-
-# Validate every stack's compose file
+# Validate the compose file
 lint:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    for s in {{stacks}}; do
-      echo "==> lint: $s"
-      $(just _dc "$s") config -q && echo "ok"
-    done
+    {{dc}} config -q && echo "ok"
 
-# Run a one-off command in a service, e.g. `just exec vault vault1 sh`
-exec stack service +cmd:
-    $(just _dc {{stack}}) exec {{service}} {{cmd}}
-
-# Remove stopped containers, dangling images and unused networks
-prune:
-    docker system prune -f
+# Run a one-off command in a service, e.g. `just exec vault sh`
+exec service +cmd:
+    {{dc}} exec {{service}} {{cmd}}

@@ -1,4 +1,68 @@
 services:
+  traefik:
+    image: traefik:v3.7
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      proxy:
+    ports:
+      # HTTP → redirects to HTTPS (websecure)
+      - "80:80"
+      # websecure: the TLS entrypoint serving all internal services.
+      # Reachable over the LAN and the tailnet (tailscaled runs on the host).
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - acme:/etc/traefik/acme
+      - traefik:/config
+      - cloudflare:/cloudflare
+    command:
+      # EntryPoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls=true"
+      - "--entrypoints.websecure.http.tls.certresolver=letsencrypt"
+      # Certs
+      - "--certificatesresolvers.letsencrypt.acme.email=letsencrypt@felixwallner.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/letsencrypt.json"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.delaybeforecheck=5"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=8.8.8.8:53"
+      # Providers
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=proxy"
+      # API & Dashboard
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+      # Observability
+      - "--log.level=INFO"
+      - "--accesslog=true"
+      - "--metrics.prometheus=true"
+    # Traefik Dynamic configuration via Docker labels
+    labels:
+      # Enable self‑routing
+      - "traefik.enable=true"
+      # Dashboard router
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+    secrets:
+      - cf_token
+    environment:
+      - CLOUDFLARE_DNS_API_TOKEN_FILE=/run/secrets/cf_token
+      - CLOUDFLARE_HTTP_TIMEOUT=${HTTP_TIMEOUT}
+      - CLOUDFLARE_POLLING_INTERVAL=${POLLING_INTERVAL}
+      - CLOUDFLARE_PROPAGATION_TIMEOUT=${PROPAGATION_TIMEOUT}
+      - CLOUDFLARE_TTL=${TTL}
+
   vault:
     image: hashicorp/vault:1.13.3
     container_name: vault
@@ -6,20 +70,30 @@ services:
     command: server
     cap_add:
       - IPC_LOCK
+    networks:
+      proxy:
     volumes:
       - ./vault1/config.hcl:/vault/config/config.hcl
       - ./vault1/data:/vault/data
+    labels:
+      # Required: exposedbydefault=false means Traefik ignores containers
+      # without this label, so the router below is never created.
+      - "traefik.enable=true"
+      - "traefik.http.routers.vault.rule=Host(`vault.${DOMAIN}`)"
+      - "traefik.http.routers.vault.entrypoints=websecure"
+      - "traefik.http.routers.vault.tls=true"
+      # No wildcard — per-host cert for vault.${ROOT_DOMAIN} via DNS-01.
+      - "traefik.http.routers.vault.tls.certresolver=letsencrypt"
+      - "traefik.http.services.vault.loadbalancer.server.port=8200"
 
-  # Cloudflare tunnel — publishes Vault to the internet. The tunnel's public
-  # hostname (configured in the Cloudflare dashboard) forwards to http://vault:8200;
-  # cloudflared reaches Vault by name over this stack's default compose network.
-  # Cloudflare's edge terminates public TLS, so no cert/reverse-proxy is needed here.
-  tunnel:
-    container_name: cloudflared-tunnel
-    image: cloudflare/cloudflared
-    restart: unless-stopped
-    command: tunnel run
-    depends_on:
-      - vault
-    environment:
-      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+networks:
+  proxy:
+
+volumes:
+  acme:
+  traefik:
+  cloudflare:
+
+secrets:
+  cf_token:
+    file: cloudflare-token.txt
