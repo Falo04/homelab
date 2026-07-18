@@ -1,0 +1,11 @@
+# Bundles the Vault Secrets Operator wiring for this cluster
+# Requires the vault-secrets-operator itself to be installed.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - serviceaccount.yaml
+  - token-reviewer.yaml
+  - vaultconnection.yaml
+  - vault-auth.yaml

@@ -1,0 +1,24 @@
+# Vault's own verification credential. When a client logs in via Kubernetes
+# auth, Vault calls the K8s TokenReview API to confirm the presented token is
+# real; it authenticates that call using this SA's token (set as
+# token_reviewer_jwt in Vault's kubernetes auth config). The ClusterRoleBinding
+# grants system:auth-delegator, the permission needed to call TokenReview.
+# Needed here because Vault runs *outside* the cluster and has no ambient creds.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-token-reviewer
+  namespace: vault-secrets
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vso-token-reviewer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - kind: ServiceAccount
+    name: vault-token-reviewer
+    namespace: vault-secrets

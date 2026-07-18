@@ -1,0 +1,14 @@
+# Tells the operator *how* to authenticate to the Vault from VaultConnection:
+# use the Kubernetes auth method, presenting the vso-auth ServiceAccount token
+# against Vault's "vso" role.
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: vault-k8s
+  namespace: vault-secrets
+spec:
+  vaultConnectionRef: vault
+  method: kubernetes
+  kubernetes:
+    role: vso
+    serviceAccount: vso-auth

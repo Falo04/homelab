@@ -1,0 +1,10 @@
+# Tells the operator *where* Vault lives.
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultConnection
+metadata:
+  name: vault
+  namespace: vault-secrets
+spec:
+  # My local vault instance, which the cluster can access
+  address: "https://192.168.178.254:443"
+  tlsServerName: "vault.int.felixwallner.com"
