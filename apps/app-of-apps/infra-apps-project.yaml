@@ -8,6 +8,7 @@ spec:
   sourceRepos:
     - https://github.com/Falo04/homelab.git
     - https://argoproj.github.io/argo-helm
+    - https://helm.releases.hashicorp.com
   destinations:
     - server: https://kubernetes.default.svc
       namespace: "*"
