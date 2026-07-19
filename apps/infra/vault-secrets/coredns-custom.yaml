@@ -1,0 +1,12 @@
+# In-cluster DNS override for the Vault hostname.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  vault.override: |
+    hosts {
+      192.168.178.254 vault.int.felixwallner.com
+      fallthrough
+    }

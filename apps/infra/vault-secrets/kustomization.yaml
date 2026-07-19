@@ -9,3 +9,4 @@ resources:
   - token-reviewer.yaml
   - vaultconnection.yaml
   - vault-auth.yaml
+  - coredns-custom.yaml
