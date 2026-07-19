@@ -1,0 +1,18 @@
+# Cloudflare API token, stored in Vault and synced into the cert-manager namespace so the
+# letsencrypt-dns ClusterIssuer can read it.
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: vault-cloudflare-secret
+  namespace: cert-manager
+spec:
+  vaultAuthRef: vault-secrets/vault-k8s
+  mount: kv
+  type: kv-v2
+  path: k3s-infra/certmanager/cloudflare
+  version: 2
+  refreshAfter: 1h
+  destination:
+    create: true
+    name: cloudflare-secret
