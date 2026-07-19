@@ -9,6 +9,9 @@ metadata:
 spec:
   vaultConnectionRef: vault
   method: kubernetes
+  allowedNamespaces:
+    - cert-manager
+    - tailscale
   kubernetes:
     role: vso
     serviceAccount: vso-auth

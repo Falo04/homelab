@@ -9,6 +9,9 @@ spec:
     - https://github.com/Falo04/homelab.git
     - https://argoproj.github.io/argo-helm
     - https://helm.releases.hashicorp.com
+    - https://traefik.github.io/charts
+    - oci://quay.io/jetstack/charts/cert-manager
+    - https://pkgs.tailscale.com/helmcharts
   destinations:
     - server: https://kubernetes.default.svc
       namespace: "*"
