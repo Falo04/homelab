@@ -1,0 +1,73 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: traefik
+  namespace: argocd
+spec:
+  project: infra-apps-project
+  sources:
+    - repoURL: https://traefik.github.io/charts
+      chart: traefik
+      targetRevision: v41.0.2
+      helm:
+        releaseName: traefik
+        values: |
+          deployment:
+            replicas: 1
+
+          # We define our own dashboard IngressRoute in the overlay (on websecure, with TLS),
+          # so disable the chart's default dashboard route and just enable the API internally.
+          ingressRoute:
+            dashboard:
+              enabled: false
+
+          additionalArguments:
+            - "--api.dashboard=true"
+            - "--providers.kubernetesingress.ingressendpoint.publishedservice=traefik/traefik"
+
+          ports:
+            web:
+              port: 80
+              expose:
+                default: true
+              exposedPort: 80
+              redirectTo: websecure
+            websecure:
+              port: 443
+              expose:
+                default: true
+              exposedPort: 443
+              protocol: TCP
+              middlewares:
+                - traefik-default-middlware-traefik@kubernetescrd
+            metrics:
+              port: 9100
+              expose:
+                default: false
+
+          service:
+            type: LoadBalancer
+            annotations:
+              # Expose the whole Traefik ingress as a single tailnet node "traefik".
+              tailscale.com/hostname: traefik
+            spec:
+              # Provisioned by the Tailscale operator 
+              loadBalancerClass: tailscale
+
+          globalArguments:
+            - "--global.sendanonymoususage=false"
+            - "--global.checknewversion=false"
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: apps/infra/traefik
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: traefik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

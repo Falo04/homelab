@@ -1,0 +1,19 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: traefik-dashboard
+  namespace: traefik
+spec:
+  entryPoints:
+    - websecure
+  tls:
+    secretName: traefik-dashboard-tls
+    options:
+      name: default
+      namespace: traefik
+  routes:
+    - match: Host(`traefik-k8s.int.felixwallner.com`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
+      kind: Rule
+      services:
+        - name: api@internal
+          kind: TraefikService
