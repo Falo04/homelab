@@ -7,11 +7,10 @@ metadata:
   name: vault-cloudflare-secret
   namespace: cert-manager
 spec:
-  vaultAuthRef: vault-secrets/vault-k8s
+  vaultAuthRef: vault-k8s
   mount: k3s-infra
   type: kv-v2
-  path: certmanager/cloudflare
-  version: 2
+  path: cert-manager/cloudflare
   refreshAfter: 1h
   destination:
     create: true
@@ -22,3 +21,18 @@ kind: ServiceAccount
 metadata:
   name: vso-auth
   namespace: cert-manager
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: vault-k8s
+  namespace: cert-manager
+spec:
+  vaultConnectionRef: vault-secrets/vault
+  method: kubernetes
+  mount: kubernetes
+  kubernetes:
+    role: vso
+    serviceAccount: vso-auth
+    audiences:
+      - vault
