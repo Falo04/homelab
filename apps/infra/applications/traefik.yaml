@@ -24,6 +24,8 @@ spec:
           additionalArguments:
             - "--api.dashboard=true"
             - "--providers.kubernetesingress.ingressendpoint.publishedservice=traefik/traefik"
+            - "--global.sendanonymoususage=false"
+            - "--global.checknewversion=false"
 
           ports:
             web:
@@ -31,15 +33,20 @@ spec:
               expose:
                 default: true
               exposedPort: 80
-              redirectTo: websecure
+              http:
+                redirections:
+                  entryPoint:
+                    to: websecure
+                    scheme: https
             websecure:
               port: 443
               expose:
                 default: true
               exposedPort: 443
               protocol: TCP
-              middlewares:
-                - traefik-default-middlware-traefik@kubernetescrd
+              http:
+                middlewares:
+                  - traefik-default-middlware-traefik@kubernetescrd
             metrics:
               port: 9100
               expose:
@@ -53,10 +60,6 @@ spec:
             spec:
               # Provisioned by the Tailscale operator 
               loadBalancerClass: tailscale
-
-          globalArguments:
-            - "--global.sendanonymoususage=false"
-            - "--global.checknewversion=false"
 
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
