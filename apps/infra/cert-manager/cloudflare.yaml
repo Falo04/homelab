@@ -8,9 +8,9 @@ metadata:
   namespace: cert-manager
 spec:
   vaultAuthRef: vault-secrets/vault-k8s
-  mount: kv
+  mount: k3s-infra
   type: kv-v2
-  path: k3s-infra/certmanager/cloudflare
+  path: certmanager/cloudflare
   version: 2
   refreshAfter: 1h
   destination:
