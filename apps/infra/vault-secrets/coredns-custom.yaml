@@ -5,8 +5,11 @@ metadata:
   name: coredns-custom
   namespace: kube-system
 data:
-  vault.override: |
-    hosts {
-      192.168.178.254 vault.int.felixwallner.com
-      fallthrough
+  vault.server: |
+    vault.int.felixwallner.com:53 {
+      hosts {
+        192.168.178.254 vault.int.felixwallner.com
+        fallthrough
+      }
+      forward . /etc/resolv.conf
     }
