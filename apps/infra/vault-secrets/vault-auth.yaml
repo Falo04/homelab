@@ -9,6 +9,7 @@ metadata:
 spec:
   vaultConnectionRef: vault
   method: kubernetes
+  mount: kubernetes
   allowedNamespaces:
     - cert-manager
     - tailscale
