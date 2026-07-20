@@ -8,9 +8,6 @@ spec:
     - websecure
   tls:
     secretName: traefik-dashboard-tls
-    options:
-      name: default
-      namespace: traefik
   routes:
     - match: Host(`traefik-k8s.int.felixwallner.com`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))
       kind: Rule
