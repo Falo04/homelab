@@ -15,3 +15,5 @@ spec:
   kubernetes:
     role: vso
     serviceAccount: vso-auth
+    audiences:
+      - vault
