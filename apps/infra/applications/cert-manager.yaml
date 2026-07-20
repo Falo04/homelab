@@ -5,7 +5,7 @@ metadata:
   namespace: argocd
 spec:
   project: infra-apps-project
-  source:
+  sources:
     - repoURL: oci://quay.io/jetstack/charts/cert-manager
       chart: cert-manager
       targetRevision: v1.20.3
