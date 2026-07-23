@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
+  - network-policy.yaml
   - default-middleware.yaml
   - tls-options.yaml
   - traefik-dashboard-cert.yaml
