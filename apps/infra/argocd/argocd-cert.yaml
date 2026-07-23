@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argocd-cert
+  namespace: argocd
+spec:
+  secretName: argocd-tls
+  commonName: argocd.int.felixwallner.com
+  dnsNames:
+    - argocd.int.felixwallner.com
+  issuerRef:
+    name: letsencrypt-dns
+    kind: ClusterIssuer
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    encoding: PKCS8
