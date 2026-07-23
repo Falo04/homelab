@@ -22,10 +22,9 @@ spec:
               seccompProfile:
                 type: RuntimeDefault
 
-          server:
-            insecure: true
-
           configs:
+            params:
+              server.insecure: true
             cm:
               url: https://argocd.int.felixwallner.com
 
