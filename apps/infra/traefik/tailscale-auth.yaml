@@ -30,7 +30,7 @@ spec:
   vaultAuthRef: vault-k8s
   type: kv-v2
   mount: k3s-infra
-  path: tailscale/traefik
+  path: traefik/tailscale
   refreshAfter: 1h
   destination:
     create: true
