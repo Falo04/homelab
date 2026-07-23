@@ -74,7 +74,7 @@ spec:
       serviceAccountName: traefik-tailscale
       containers:
         - name: tailscale
-          image: ghcr.io/tailscale/tailscale:v1.98.0
+          image: ghcr.io/tailscale/tailscale:v1.98.9
           env:
             - name: TS_HOSTNAME
               value: traefik
