@@ -5,8 +5,8 @@ namespace: argocd
 
 resources:
   - argocd.yaml
+  - cilium.yaml
   - cert-manager.yaml
   - traefik.yaml
-  - tailscale-operator.yaml
   - vault-secrets-operator.yaml
   - vault-secrets.yaml

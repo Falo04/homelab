@@ -47,19 +47,23 @@ spec:
               http:
                 middlewares:
                   - traefik-default-middlware-traefik@kubernetescrd
+            # Dedicated entrypoint for tailnet traffic. 
+            tailscale:
+              port: 8443
+              expose:
+                default: false
+              exposedPort: 8443
+              protocol: TCP
+              http:
+                middlewares:
+                  - traefik-default-middlware-traefik@kubernetescrd
             metrics:
               port: 9100
               expose:
                 default: false
 
           service:
-            type: LoadBalancer
-            annotations:
-              # Expose the whole Traefik ingress as a single tailnet node "traefik".
-              tailscale.com/hostname: traefik
-            spec:
-              # Provisioned by the Tailscale operator 
-              loadBalancerClass: tailscale
+            type: ClusterIP
 
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main

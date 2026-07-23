@@ -7,3 +7,5 @@ resources:
   - tls-options.yaml
   - traefik-dashboard-cert.yaml
   - traefik-dashboard-ingress.yaml
+  - tailscale-auth.yaml
+  - tailscale-proxy.yaml

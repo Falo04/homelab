@@ -1,0 +1,116 @@
+# Standalone Tailscale node (userspace mode) that fronts all of Traefik on the
+# tailnet.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traefik-tailscale
+  namespace: traefik
+---
+# tailscaled persists its node state in a Secret so it survives pod restarts;
+# these are the only permissions containerboot needs to manage it.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: traefik-tailscale
+  namespace: traefik
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resourceNames: ["traefik-tailscale-state"]
+    resources: ["secrets"]
+    verbs: ["get", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: traefik-tailscale
+  namespace: traefik
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: traefik-tailscale
+subjects:
+  - kind: ServiceAccount
+    name: traefik-tailscale
+    namespace: traefik
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-tailscale-serve
+  namespace: traefik
+data:
+  serve.json: |
+    {
+      "TCP": {
+        "443": { "TCPForward": "traefik.traefik.svc.cluster.local:8443" },
+        "80":  { "TCPForward": "traefik.traefik.svc.cluster.local:80" }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik-tailscale
+  namespace: traefik
+  labels:
+    app: traefik-tailscale
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik-tailscale
+  template:
+    metadata:
+      labels:
+        app: traefik-tailscale
+    spec:
+      serviceAccountName: traefik-tailscale
+      containers:
+        - name: tailscale
+          image: ghcr.io/tailscale/tailscale:v1.98.0
+          env:
+            - name: TS_HOSTNAME
+              value: traefik
+            - name: TS_KUBE_SECRET
+              value: traefik-tailscale-state
+            - name: TS_USERSPACE
+              value: "true"
+            - name: TS_AUTH_ONCE
+              value: "true"
+            - name: TS_SERVE_CONFIG
+              value: /etc/ts-serve/serve.json
+            - name: TS_AUTHKEY
+              valueFrom:
+                secretKeyRef:
+                  name: tailscale-auth
+                  key: TS_AUTHKEY
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_UID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
+          volumeMounts:
+            - name: serve-config
+              mountPath: /etc/ts-serve
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+        - name: serve-config
+          configMap:
+            name: traefik-tailscale-serve

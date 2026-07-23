@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cilium
+  namespace: argocd
+spec:
+  project: infra-apps-project
+  sources:
+    - repoURL: https://helm.cilium.io/
+      chart: cilium
+      targetRevision: 1.19.5
+      helm:
+        releaseName: cilium
+        # Values mirror the current in-cluster Helm release so Argo adopts it
+        # without changing the running CNI. Only bpf.hostLegacyRouting was added.
+        values: |
+          autoDirectNodeRoutes: true
+          bgpControlPlane:
+            enabled: false
+          bpf:
+            masquerade: true
+          cluster:
+            name: default
+          devices: vmbr0
+          hubble:
+            enabled: true
+            relay:
+              enabled: true
+            ui:
+              enabled: true
+          ipam:
+            operator:
+              clusterPoolIPv4PodCIDRList: "10.52.0.0/16"
+          ipv4NativeRoutingCIDR: 10.52.0.0/16
+          k8sServiceHost: 127.0.0.1
+          k8sServicePort: 6444
+          kubeProxyReplacement: true
+          operator:
+            replicas: 1
+          routingMode: native
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
