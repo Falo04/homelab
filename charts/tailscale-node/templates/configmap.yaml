@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "tailscale-node.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tailscale-node.labels" . | nindent 4 }}
+data:
+  serve: |-
+    {
+      "TCP": {
+        {{- range $index, $item := .Values.tailscale.tcpForward }}
+        {{- $host := $item.targetService | default (printf "%s.%s.svc.cluster.local" $item.service $.Release.Namespace) }}
+        {{- $port := $item.targetPort | default $item.port }}
+        {{- if $index }},{{ end }}
+        "{{ $item.port }}": { "TCPForward": "{{ $host }}:{{ $port }}" }
+        {{- end }}
+      }
+    }

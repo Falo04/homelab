@@ -1,0 +1,55 @@
+# Container image for the userspace tailscaled node.
+image:
+  # Image repository.
+  repository: ghcr.io/tailscale/tailscale
+  # Image tag (Tailscale version).
+  tag: v1.98.9
+  # Pull policy for the image.
+  pullPolicy: IfNotPresent
+
+pod:
+  # Extra annotations to add to the node pod template.
+  annotations: {}
+  # Override the chart name portion of resource labels (app.kubernetes.io/name).
+  nameOverride: ""
+  # Override the full resource name (defaults to the release name).
+  fullnameOverride: ""
+
+# The tailnet auth key is synced from Vault by the Vault Secrets Operator. This
+# chart only creates the VaultStaticSecret; the VaultAuth it references and must
+# already exist.
+vault:
+  # Name of an existing VaultAuth in the release namespace to authenticate with.
+  authRef: ""
+  # KV-v2 secrets-engine mount that holds the auth key (e.g. "k3s-infra").
+  mount: ""
+  # Path within the KV mount to a secret containing a `TS_AUTHKEY` field.
+  path: ""
+  # How often the operator re-reads the key from Vault.
+  refreshAfter: 1h
+
+tailscale:
+  # Tailnet hostname for this node (TS_HOSTNAME).
+  hostname: ""
+
+  # TCP forwards rendered into the tailscale serve config. Each entry exposes a
+  # port on the tailnet node and forwards it to an in-cluster backend.
+  # Add a forward = add a list item.
+  tcpForward:
+    # Port the tailnet node listens on.
+    - port: 80
+      # Backend port to forward to (defaults to `port` when omitted).
+      targetPort: 80
+      # Backend Service name.
+      service: ""
+      # Explicit backend host.
+      targetService: ""
+
+# Resource requests/limits for the node container.
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi

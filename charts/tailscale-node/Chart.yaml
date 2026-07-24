@@ -1,0 +1,6 @@
+apiVersion: v2
+name: tailscale-node
+description: A userspace Tailscale node that TCP-forwards tailnet traffic to an in-cluster service.
+type: application
+version: 0.1.0
+appVersion: "1.98.9"
