@@ -68,6 +68,8 @@ services:
     container_name: vault
     hostname: vault
     command: server
+    environment:
+      - VAULT_ADDR=http://127.0.0.1:8200
     cap_add:
       - IPC_LOCK
     networks:

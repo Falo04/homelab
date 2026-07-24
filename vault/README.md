@@ -60,11 +60,20 @@ Vault starts **sealed and uninitialized**. Initialize once, then unseal (repeat
 with enough key shares to meet the threshold). Save the unseal keys and root
 token — they're shown only once.
 
+`VAULT_ADDR` is preset to `http://127.0.0.1:8200` in the container (the
+listener runs HTTP; Traefik terminates TLS), so the CLI works directly:
+
 ```bash
-just exec vault vault sh
-$ export VAULT_ADDR=http://127.0.0.1:8200
-$ vault operator init
-$ vault operator unseal <unseal-key>
+just exec vault vault operator init
+just exec vault vault operator unseal <unseal-key>
+```
+
+Privileged commands additionally need a token. Log in once — the token is
+written to `~/.vault-token` inside the container and persists for the life of
+the container, so subsequent commands pick it up automatically:
+
+```bash
+just exec vault vault login <root-token>
 ```
 
 Vault must be unsealed again after every container restart (unless you configure
@@ -81,6 +90,7 @@ a newer version an older binary may refuse to start. Before upgrading, back up
 `vault/vault1/data/` and take a snapshot:
 
 ```bash
+just exec vault vault login <root-token>   # snapshot needs a privileged token
 just exec vault vault operator raft snapshot save /vault/data/pre-upgrade.snap
 ```
 
