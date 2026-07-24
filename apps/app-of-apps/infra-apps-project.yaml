@@ -12,6 +12,7 @@ spec:
     - https://traefik.github.io/charts
     - oci://quay.io/jetstack/charts/cert-manager
     - ghcr.io/tailscale/tailscale
+    - https://helm.cilium.io/
   destinations:
     - server: https://kubernetes.default.svc
       namespace: "*"
