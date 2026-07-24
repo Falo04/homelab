@@ -9,6 +9,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: traefik
   ingress:
+    # Public HTTP/HTTPS entrypoints, reachable from anywhere
     - fromEntities:
         - cluster
         - world
@@ -18,11 +19,16 @@ spec:
               protocol: TCP
             - port: "443"
               protocol: TCP
-            - port: "8080"
-              protocol: TCP
+
+    # Prometheus metrics
+    - fromEntities:
+        - cluster
+      toPorts:
+        - ports:
             - port: "9100"
               protocol: TCP
 
+    # Tailscale entrypoint
     - fromEndpoints:
         - matchLabels:
             app.kubernetes.io/instance: traefik-tailscale

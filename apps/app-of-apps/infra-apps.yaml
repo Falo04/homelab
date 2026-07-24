@@ -6,7 +6,7 @@ metadata:
 spec:
   project: infra-apps-project
   source:
-    repoURL: https://github.com/Falo04/homelab
+    repoURL: https://github.com/Falo04/homelab.git
     targetRevision: main
     path: apps/infra/applications
   destination:

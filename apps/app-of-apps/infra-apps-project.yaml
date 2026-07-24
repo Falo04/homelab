@@ -15,7 +15,17 @@ spec:
     - https://helm.cilium.io/
   destinations:
     - server: https://kubernetes.default.svc
-      namespace: "*"
+      namespace: argocd
+    - server: https://kubernetes.default.svc
+      namespace: cert-manager
+    - server: https://kubernetes.default.svc
+      namespace: traefik
+    - server: https://kubernetes.default.svc
+      namespace: kube-system
+    - server: https://kubernetes.default.svc
+      namespace: vault-secrets
+    - server: https://kubernetes.default.svc
+      namespace: vault-secrets-operator
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"

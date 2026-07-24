@@ -20,10 +20,22 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: {{ include "tailscale-node.fullname" . }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: tailscale
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           env:
             - name: TS_HOSTNAME
               value: {{ .Values.tailscale.hostname | quote }}
