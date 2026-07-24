@@ -68,6 +68,29 @@ spec:
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
       path: apps/infra/traefik
+
+    # Standalone Tailscale node fronting Traefik on the tailnet.
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/tailscale-node
+      helm:
+        releaseName: traefik-tailscale
+        valuesObject:
+          pod:
+            fullnameOverride: tailscale
+          tailscale:
+            hostname: traefik
+            tcpForward:
+              - port: 443
+                targetPort: 8443
+                service: traefik
+              - port: 80
+                targetPort: 80
+                service: traefik
+          vault:
+            authRef: vault-k8s
+            mount: k3s-infra
+            path: traefik/tailscale
   destination:
     server: https://kubernetes.default.svc
     namespace: traefik

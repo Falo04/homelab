@@ -25,7 +25,7 @@ spec:
 
     - fromEndpoints:
         - matchLabels:
-            app: traefik-tailscale
+            app.kubernetes.io/instance: traefik-tailscale
       toPorts:
         - ports:
             - port: "8443"

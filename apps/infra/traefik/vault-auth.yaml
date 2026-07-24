@@ -1,4 +1,4 @@
-# Pulls the tailnet auth key for the Traefik tailnet proxy out of Vault.
+# Namespace-level Vault access for the traefik namespace (Kubernetes auth).
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -20,18 +20,3 @@ spec:
     serviceAccount: vso-auth
     audiences:
       - vault
----
-apiVersion: secrets.hashicorp.com/v1beta1
-kind: VaultStaticSecret
-metadata:
-  name: tailscale-auth
-  namespace: traefik
-spec:
-  vaultAuthRef: vault-k8s
-  type: kv-v2
-  mount: k3s-infra
-  path: traefik/tailscale
-  refreshAfter: 1h
-  destination:
-    create: true
-    name: tailscale-auth
