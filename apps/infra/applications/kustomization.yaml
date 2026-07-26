@@ -5,6 +5,7 @@ namespace: argocd
 
 resources:
   - argocd.yaml
+  - authentik.yaml
   - cilium.yaml
   - cert-manager.yaml
   - cloudnativepg.yaml

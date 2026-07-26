@@ -1,0 +1,69 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: authentik
+  namespace: argocd
+spec:
+  project: infra-apps-project
+  sources:
+    - repoURL: https://charts.goauthentik.io
+      chart: authentik
+      targetRevision: 2026.5.6
+      helm:
+        releaseName: authentik
+        values: |
+          authentik:
+            error_reporting:
+              enabled: false
+
+          postgresql:
+            enabled: false
+
+          server:
+            ingress:
+              enabled: false
+
+          global:
+            env:
+              - name: AUTHENTIK_POSTGRESQL__HOST
+                valueFrom:
+                  secretKeyRef:
+                    name: authentik-postgres-app
+                    key: host
+              - name: AUTHENTIK_POSTGRESQL__PORT
+                valueFrom:
+                  secretKeyRef:
+                    name: authentik-postgres-app
+                    key: port
+              - name: AUTHENTIK_POSTGRESQL__NAME
+                valueFrom:
+                  secretKeyRef:
+                    name: authentik-postgres-app
+                    key: dbname
+              - name: AUTHENTIK_POSTGRESQL__USER
+                valueFrom:
+                  secretKeyRef:
+                    name: authentik-postgres-app
+                    key: username
+              - name: AUTHENTIK_POSTGRESQL__PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: authentik-postgres-app
+                    key: password
+            envFrom:
+              - secretRef:
+                  name: secret-key-secret
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: apps/infra/authentik
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: authentik
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

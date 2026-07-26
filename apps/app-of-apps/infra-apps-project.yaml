@@ -13,6 +13,7 @@ spec:
     - oci://quay.io/jetstack/charts/cert-manager
     - ghcr.io/tailscale/tailscale
     - https://helm.cilium.io/
+    - https://charts.goauthentik.io
   destinations:
     - server: https://kubernetes.default.svc
       namespace: argocd
@@ -28,6 +29,8 @@ spec:
       namespace: vault-secrets-operator
     - server: https://kubernetes.default.svc
       namespace: cnpg-system
+    - server: https://kubernetes.default.svc
+      namespace: authentik
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
