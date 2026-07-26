@@ -26,6 +26,8 @@ spec:
       namespace: vault-secrets
     - server: https://kubernetes.default.svc
       namespace: vault-secrets-operator
+    - server: https://kubernetes.default.svc
+      namespace: cnpg-system
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
