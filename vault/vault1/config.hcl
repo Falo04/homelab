@@ -1,5 +1,5 @@
 ui = true
-disable_mlock = false
+disable_mlock = true
 
 listener "tcp" {
   address     = "0.0.0.0:8200"
