@@ -5,5 +5,7 @@ namespace: argocd
 
 resources:
   - namespace.yaml
+  - vault-auth.yaml
+  - oidc-secret.yaml
   - argocd-cert.yaml
   - argocd-ingress.yaml

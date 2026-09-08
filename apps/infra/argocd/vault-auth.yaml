@@ -1,0 +1,22 @@
+# Namespace-level Vault access for the argocd namespace (Kubernetes auth).
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vso-auth
+  namespace: argocd
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: vault-k8s
+  namespace: argocd
+spec:
+  vaultConnectionRef: vault-secrets/vault
+  method: kubernetes
+  mount: kubernetes
+  kubernetes:
+    role: vso
+    serviceAccount: vso-auth
+    audiences:
+      - vault

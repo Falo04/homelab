@@ -27,6 +27,25 @@ spec:
               server.insecure: true
             cm:
               url: https://argocd.int.felixwallner.com
+              # Re-enable it temporarily if SSO is not available.
+              admin.enabled: false
+              oidc.config: |
+                name: authentik
+                issuer: https://sso.int.felixwallner.com/application/o/argocd/
+                clientID: $argocd-oidc:clientID
+                clientSecret: $argocd-oidc:clientSecret
+                requestedScopes:
+                  - openid
+                  - profile
+                  - email
+                  - groups
+                logoutURL: https://sso.int.felixwallner.com/application/o/argocd/end-session/
+            rbac:
+              policy.default: ""
+              scopes: "[groups]"
+              policy.csv: |
+                g, admins, role:admin
+                g, viewers, role:readonly
 
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
