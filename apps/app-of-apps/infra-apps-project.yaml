@@ -36,6 +36,8 @@ spec:
       namespace: authentik
     - server: https://kubernetes.default.svc
       namespace: grafana
+    - server: https://kubernetes.default.svc
+      namespace: kube-prometheus-stack
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
