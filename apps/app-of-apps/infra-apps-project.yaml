@@ -34,6 +34,8 @@ spec:
       namespace: cnpg-system
     - server: https://kubernetes.default.svc
       namespace: authentik
+    - server: https://kubernetes.default.svc
+      namespace: grafana
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
