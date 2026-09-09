@@ -22,6 +22,18 @@ spec:
           server:
             ingress:
               enabled: false
+            metrics:
+              enabled: true
+              serviceMonitor:
+                enabled: true
+                interval: 30s
+
+          worker:
+            metrics:
+              enabled: true
+              serviceMonitor:
+                enabled: true
+                interval: 30s
 
           global:
             env:
