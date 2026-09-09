@@ -1,0 +1,78 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argocd
+spec:
+  project: infra-apps-project
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: 90.0.0
+      helm:
+        releaseName: kube-prometheus-stack
+        values: |
+          grafana:
+            enabled: false
+
+          kubeControllerManager:
+            enabled: false
+          kubeScheduler:
+            enabled: false
+          kubeProxy:
+            enabled: false
+          kubeEtcd:
+            enabled: false
+
+          defaultRules:
+            rules:
+              kubeControllerManager: false
+              kubeSchedulerAlerting: false
+              kubeSchedulerRecording: false
+              kubeProxy: false
+              etcd: false
+              kubernetesSystem: false
+              windows: false
+
+          prometheus:
+            prometheusSpec:
+              retention: 15d
+              retentionSize: 15GiB
+              serviceMonitorSelectorNilUsesHelmValues: false
+              podMonitorSelectorNilUsesHelmValues: false
+              ruleSelectorNilUsesHelmValues: false
+              probeSelectorNilUsesHelmValues: false
+              scrapeConfigSelectorNilUsesHelmValues: false
+              storageSpec:
+                volumeClaimTemplate:
+                  spec:
+                    accessModes:
+                      - ReadWriteOnce
+                    resources:
+                      requests:
+                        storage: 20Gi
+
+          alertmanager:
+            alertmanagerSpec:
+              storage:
+                volumeClaimTemplate:
+                  spec:
+                    accessModes:
+                      - ReadWriteOnce
+                    resources:
+                      requests:
+                        storage: 2Gi
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: apps/infra/monitoring
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

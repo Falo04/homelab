@@ -1,0 +1,22 @@
+# Namespace-level Vault access for the grafana namespace (Kubernetes auth).
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vso-auth
+  namespace: grafana
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: vault-k8s
+  namespace: grafana
+spec:
+  vaultConnectionRef: vault-secrets/vault
+  method: kubernetes
+  mount: kubernetes
+  kubernetes:
+    role: vso
+    serviceAccount: vso-auth
+    audiences:
+      - vault

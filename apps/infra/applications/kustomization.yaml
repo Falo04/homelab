@@ -8,6 +8,8 @@ resources:
   - authentik.yaml
   - cert-manager.yaml
   - cloudnativepg.yaml
+  - grafana.yaml
+  - kube-prometheus-stack.yaml
   - traefik.yaml
   - vault-secrets-operator.yaml
   - vault-secrets.yaml

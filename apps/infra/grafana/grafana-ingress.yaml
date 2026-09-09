@@ -1,0 +1,17 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: grafana-ingress
+  namespace: grafana
+spec:
+  entryPoints:
+    - tailscale
+  tls:
+    secretName: grafana-tls
+  routes:
+    - kind: Rule
+      match: Host(`grafana.int.felixwallner.com`)
+      priority: 10
+      services:
+        - name: grafana
+          port: 80
