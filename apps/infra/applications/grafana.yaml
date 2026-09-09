@@ -27,6 +27,16 @@ spec:
             userKey: admin-user
             passwordKey: admin-password
 
+          # Dashboards ship as labelled ConfigMaps in this namespace, generated
+          # from the JSON files under apps/infra/grafana/dashboards.
+          sidecar:
+            dashboards:
+              enabled: true
+              label: grafana_dashboard
+              folderAnnotation: grafana_folder
+              provider:
+                foldersFromFilesStructure: true
+
           env:
             GF_DATABASE_TYPE: postgres
             GF_DATABASE_HOST: grafana-postgres-rw:5432

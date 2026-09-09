@@ -8,6 +8,7 @@ resources:
   - authentik.yaml
   - cert-manager.yaml
   - cloudnativepg.yaml
+  - fronius-exporter.yaml
   - grafana.yaml
   - kube-prometheus-stack.yaml
   - traefik.yaml

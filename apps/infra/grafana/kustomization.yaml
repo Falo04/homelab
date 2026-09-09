@@ -9,3 +9,4 @@ resources:
   - postgres.yaml
   - grafana-cert.yaml
   - grafana-ingress.yaml
+  - dashboards/photovoltaik.yaml
