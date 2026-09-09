@@ -9,4 +9,34 @@ resources:
   - postgres.yaml
   - grafana-cert.yaml
   - grafana-ingress.yaml
-  - dashboards/photovoltaik.yaml
+
+configMapGenerator:
+  - name: grafana-dashboard-fronius
+    files:
+      - dashboards/photovoltaik.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "Infra"
+
+  - name: grafana-dashboard-k8s
+    files:
+      - dashboards/k8s-dashboard.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "Infra"
+
+  - name: grafana-dashboard-cnpg
+    files:
+      - dashboards/cnpg.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "Infra"
+
+generatorOptions:
+  disableNameSuffixHash: true
