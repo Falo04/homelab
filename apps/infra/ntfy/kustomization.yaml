@@ -7,6 +7,7 @@ resources:
   - auth-secret.yaml
   - postgres.yaml
   - deployment.yaml
+  - servicemonitor.yaml
   - ntfy-cert.yaml
   - ntfy-ingress.yaml
 

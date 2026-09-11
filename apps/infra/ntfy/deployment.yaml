@@ -29,6 +29,8 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+            - name: metrics
+              containerPort: 9090
           env:
             - name: NTFY_DATABASE_URL
               valueFrom:
@@ -72,6 +74,8 @@ kind: Service
 metadata:
   name: ntfy
   namespace: ntfy
+  labels:
+    app.kubernetes.io/name: ntfy
 spec:
   selector:
     app.kubernetes.io/name: ntfy
@@ -79,3 +83,6 @@ spec:
     - name: http
       port: 80
       targetPort: http
+    - name: metrics
+      port: 9090
+      targetPort: metrics

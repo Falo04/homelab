@@ -19,3 +19,6 @@ cache-duration: "72h"
 # iOS only: forwards a content-free "poll now" ping via ntfy.sh so the iOS app
 # wakes up and fetches the message from this server. Remove if you only use Android.
 upstream-base-url: "https://ntfy.sh"
+
+# Monitoring
+metrics-listen-http: ":9090"
