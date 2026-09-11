@@ -6,3 +6,5 @@ namespace: argocd
 resources:
   - infra-apps.yaml
   - infra-apps-project.yaml
+  - service-apps.yaml
+  - service-apps-project.yaml

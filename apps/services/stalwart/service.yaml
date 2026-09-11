@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: stalwart-headless
+  namespace: stalwart
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: stalwart
+  ports:
+    - name: mgmt
+      port: 8080
+      targetPort: mgmt
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: stalwart-service
+  namespace: stalwart
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: stalwart
+  ports:
+    - name: smtp
+      port: 25
+      targetPort: smtp
+    - name: smtps
+      port: 465
+      targetPort: smtps
+    - name: submission
+      port: 587
+      targetPort: submission
+    - name: imap
+      port: 143
+      targetPort: imap
+    - name: imaps
+      port: 993
+      targetPort: imaps
+    - name: pop3
+      port: 110
+      targetPort: pop3
+    - name: pop3s
+      port: 995
+      targetPort: pop3s
+    - name: sieve
+      port: 4190
+      targetPort: sieve
+    - name: http
+      port: 80
+      targetPort: http
+    - name: https
+      port: 443
+      targetPort: https
+    - name: mgmt
+      port: 8080
+      targetPort: mgmt

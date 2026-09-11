@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: service-apps-project
+  namespace: argocd
+spec:
+  description: "All third party apps"
+  sourceRepos:
+    - https://github.com/Falo04/homelab.git
+  destinations:
+    # The service-apps Application itself lands in argocd, so the project has
+    # to permit that namespace or Argo rejects it before any sync happens.
+    - server: https://kubernetes.default.svc
+      namespace: argocd
+    # One line per service namespace. Switch to "*" if this gets tedious.
+    - server: https://kubernetes.default.svc
+      namespace: stalwart
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

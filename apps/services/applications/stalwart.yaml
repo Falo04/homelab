@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: stalwart
+  namespace: argocd
+spec:
+  project: service-apps-project
+  sources:
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: apps/services/stalwart
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: stalwart
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
