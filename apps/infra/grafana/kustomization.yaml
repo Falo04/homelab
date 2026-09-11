@@ -30,5 +30,14 @@ configMapGenerator:
       annotations:
         grafana_folder: "Infra"
 
+  - name: grafana-dashboard-k8s
+    files:
+      - dashboards/ntfy.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+      annotations:
+        grafana_folder: "Infra"
+
 generatorOptions:
   disableNameSuffixHash: true
