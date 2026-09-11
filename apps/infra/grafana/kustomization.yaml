@@ -11,15 +11,6 @@ resources:
   - grafana-ingress.yaml
 
 configMapGenerator:
-  - name: grafana-dashboard-fronius
-    files:
-      - dashboards/photovoltaik.json
-    options:
-      labels:
-        grafana_dashboard: "1"
-      annotations:
-        grafana_folder: "Infra"
-
   - name: grafana-dashboard-k8s
     files:
       - dashboards/k8s-dashboard.json
