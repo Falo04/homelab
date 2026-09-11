@@ -10,6 +10,7 @@ resources:
   - cloudnativepg.yaml
   - grafana.yaml
   - kube-prometheus-stack.yaml
+  - ntfy.yaml
   - traefik.yaml
   - vault-secrets-operator.yaml
   - vault-secrets.yaml

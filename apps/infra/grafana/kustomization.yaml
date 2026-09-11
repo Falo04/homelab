@@ -6,6 +6,7 @@ resources:
   - vault-auth.yaml
   - oidc-secret.yaml
   - admin-secret.yaml
+  - ntfy-secret.yaml
   - postgres.yaml
   - grafana-cert.yaml
   - grafana-ingress.yaml

@@ -1,0 +1,22 @@
+# ntfy server config. Secrets (database URL, users, tokens) come in via env.
+base-url: "https://ntfy.int.felixwallner.com"
+listen-http: ":8080"
+behind-proxy: true
+
+# Private instance: nothing is readable or writable without an ACL entry.
+auth-default-access: "deny-all"
+enable-login: true
+enable-signup: false
+
+# Topic ACLs. Users themselves are provisioned from Vault (NTFY_AUTH_USERS).
+auth-access:
+  - "alertmanager:homelab-alerts:wo"
+  - "grafana:homelab-alerts:wo"
+  - "ios:homelab-alerts:ro"
+
+# Keep missed notifications around for phones that were offline for a while.
+cache-duration: "72h"
+
+# iOS only: forwards a content-free "poll now" ping via ntfy.sh so the iOS app
+# wakes up and fetches the message from this server. Remove if you only use Android.
+upstream-base-url: "https://ntfy.sh"

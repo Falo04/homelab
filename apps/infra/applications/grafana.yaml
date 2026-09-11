@@ -64,6 +64,10 @@ spec:
               secretKeyRef:
                 name: grafana-oidc
                 key: clientSecret
+            NTFY_TOKEN:
+              secretKeyRef:
+                name: grafana-ntfy
+                key: token
 
           datasources:
             datasources.yaml:
@@ -78,6 +82,36 @@ spec:
                   jsonData:
                     timeInterval: 30s
                     httpMethod: POST
+                # Shows Prometheus/Alertmanager alerts and silences in Grafana's alerting UI.
+                - name: Alertmanager
+                  type: alertmanager
+                  uid: alertmanager
+                  access: proxy
+                  url: http://kube-prometheus-stack-alertmanager.monitoring.svc.cluster.local:9093
+                  jsonData:
+                    implementation: prometheus
+                    handleGrafanaManagedAlerts: false
+
+          alerting:
+            contactpoints.yaml:
+              apiVersion: 1
+              contactPoints:
+                - orgId: 1
+                  name: ntfy
+                  receivers:
+                    - uid: ntfy
+                      type: webhook
+                      settings:
+                        url: http://ntfy.ntfy.svc.cluster.local/homelab-alerts?template=grafana
+                        httpMethod: POST
+                        authorization_scheme: Bearer
+                        authorization_credentials: $__env{NTFY_TOKEN}
+            policies.yaml:
+              apiVersion: 1
+              policies:
+                - orgId: 1
+                  receiver: ntfy
+                  group_by: [grafana_folder, alertname]
 
           grafana.ini:
             server:

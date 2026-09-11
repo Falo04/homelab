@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ntfy-ingress
+  namespace: ntfy
+spec:
+  entryPoints:
+    - tailscale
+  tls:
+    secretName: ntfy-tls
+  routes:
+    - kind: Rule
+      match: Host(`ntfy.int.felixwallner.com`)
+      services:
+        - name: ntfy
+          port: 80

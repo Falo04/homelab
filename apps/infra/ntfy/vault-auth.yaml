@@ -1,0 +1,22 @@
+# Namespace-level Vault access for the ntfy namespace (Kubernetes auth).
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vso-auth
+  namespace: ntfy
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: vault-k8s
+  namespace: ntfy
+spec:
+  vaultConnectionRef: vault-secrets/vault
+  method: kubernetes
+  mount: kubernetes
+  kubernetes:
+    role: vso
+    serviceAccount: vso-auth
+    audiences:
+      - vault

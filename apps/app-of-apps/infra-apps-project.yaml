@@ -38,6 +38,8 @@ spec:
       namespace: grafana
     - server: https://kubernetes.default.svc
       namespace: monitoring
+    - server: https://kubernetes.default.svc
+      namespace: ntfy
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"

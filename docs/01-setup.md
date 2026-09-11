@@ -134,7 +134,7 @@ EOF
 
 vault write auth/kubernetes/role/vso \
     bound_service_account_names=vso-auth \
-    bound_service_account_namespaces=vault-secrets,traefik,cert-manager,authentik,argocd,grafana \
+    bound_service_account_namespaces=vault-secrets,traefik,cert-manager,authentik,argocd,grafana,monitoring,ntfy \
     audience=vault \
     policies=k3s-infra-read \
     ttl=1h
