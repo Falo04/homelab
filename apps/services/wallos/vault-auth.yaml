@@ -14,7 +14,7 @@ spec:
   method: kubernetes
   mount: kubernetes
   kubernetes:
-    role: vso-services
+    role: vso
     serviceAccount: vso-auth
     audiences:
       - vault
