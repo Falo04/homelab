@@ -1,0 +1,44 @@
+# Container image for the nginx reverse proxy. The unprivileged variant listens
+# above 1024 and keeps its temp files under /tmp, so it needs no capabilities.
+image:
+  # Image repository.
+  repository: nginxinc/nginx-unprivileged
+  # Image tag (nginx version).
+  tag: 1.29-alpine
+  # Pull policy for the image.
+  pullPolicy: IfNotPresent
+
+pod:
+  # Extra annotations to add to the nginx pod template.
+  annotations: {}
+  # Override the chart name portion of resource labels (app.kubernetes.io/name).
+  nameOverride: ""
+  # Override the full resource name (defaults to the release name).
+  fullnameOverride: ""
+
+# Hostname this proxy serves (server_name, and the CN of the certificate).
+host: ""
+
+# Secret holding `tls.crt` / `tls.key`. This is the `secretName` of the
+# cert-manager Certificate for `host`, and must exist in the release namespace
+# before the pod can start.
+tlsSecret: ""
+
+# The single backend this proxy forwards to.
+backend:
+  # Backend Service name, in the release namespace.
+  service: ""
+  # Backend Service port.
+  port: 80
+
+# Largest request body nginx accepts, e.g. for file uploads.
+maxBodySize: 32m
+
+# Resource requests/limits for the nginx container.
+resources:
+  requests:
+    cpu: 10m
+    memory: 16Mi
+  limits:
+    cpu: 100m
+    memory: 64Mi
