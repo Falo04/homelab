@@ -30,7 +30,7 @@ configMapGenerator:
       annotations:
         grafana_folder: "Infra"
 
-  - name: grafana-dashboard-k8s
+  - name: grafana-dashboard-ntfy
     files:
       - dashboards/ntfy.json
     options:
