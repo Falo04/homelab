@@ -1,0 +1,13 @@
+# Wallos keeps its SQLite database and uploaded logos on disk, so both need to
+# outlive the pod. storageClassName is omitted to take the cluster default.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wallos-data
+  namespace: wallos
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wallos
+  namespace: argocd
+spec:
+  project: service-apps-project
+  sources:
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: apps/services/wallos
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/tailscale-node
+      helm:
+        releaseName: wallos-tailscale
+        valuesObject:
+          pod:
+            fullnameOverride: tailscale
+          tailscale:
+            hostname: wallos
+            tcpForward:
+              - port: 443
+                targetPort: 443
+                service: wallos-ingress
+              - port: 80
+                targetPort: 80
+                service: wallos-ingress
+          vault:
+            authRef: vault-k8s
+            mount: k3s-services
+            path: wallos/tailscale
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/nginx-ingress
+      helm:
+        releaseName: wallos-ingress
+        valuesObject:
+          pod:
+            fullnameOverride: wallos-ingress
+          host: wallos.int.felixwallner.com
+          tlsSecret: wallos-tls
+          backend:
+            service: wallos
+            port: 80
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: wallos
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

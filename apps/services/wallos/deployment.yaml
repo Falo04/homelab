@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wallos
+  namespace: wallos
+  labels:
+    app.kubernetes.io/name: wallos
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  # The data volume is ReadWriteOnce, so the old pod has to go before the new
+  # one can mount it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: wallos
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: wallos
+    spec:
+      securityContext:
+        # www-data in the image, so the freshly provisioned volume is writable.
+        fsGroup: 33
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: wallos
+          image: bellamy/wallos:v5.7.1
+          ports:
+            - name: http
+              containerPort: 80
+          securityContext:
+            allowPrivilegeEscalation: false
+          env:
+            - name: TZ
+              value: "Europe/Berlin"
+            - name: OIDC_ENABLED
+              value: "true"
+            - name: OIDC_AUTO_CREATE_USER
+              value: "true"
+            - name: OIDC_DISABLE_PASSWORD_LOGIN
+              value: "true"
+          envFrom:
+            - secretRef:
+                name: wallos-auth
+          volumeMounts:
+            - name: data
+              mountPath: /var/www/html/db
+              subPath: db
+            - name: data
+              mountPath: /var/www/html/images/uploads/logos
+              subPath: logos
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: wallos-data
