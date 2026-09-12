@@ -27,7 +27,7 @@ spec:
     # ... the app's own sources ...
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
-      path: charts/nginx-ingress
+      path: charts/service-ingress
       helm:
         releaseName: wallos-ingress
         valuesObject:
