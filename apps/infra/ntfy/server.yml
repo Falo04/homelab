@@ -12,6 +12,7 @@ enable-signup: false
 auth-access:
   - "alertmanager:homelab-alerts:wo"
   - "grafana:homelab-alerts:wo"
+  - "wallos:wallos:wo"
 
 # Keep missed notifications around for phones that were offline for a while.
 cache-duration: "72h"

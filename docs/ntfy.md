@@ -12,6 +12,7 @@ over the cluster network; phones subscribe over Tailscale.
 | `felix`        | admin | phone app / web UI    | everything             |
 | `alertmanager` | user  | Alertmanager webhook  | `homelab-alerts` write |
 | `grafana`      | user  | Grafana contact point | `homelab-alerts` write |
+| `wallos`       | user  | Wallos publisher      | `wallos` write         |
 
 ACLs live in `apps/infra/ntfy/server.yml`. Users and tokens live in Vault.
 
@@ -32,8 +33,8 @@ Single quotes matter, bcrypt hashes contain `$`.
 
 ```bash
 vault kv put k3s-infra/ntfy/auth \
-  NTFY_AUTH_USERS='felix:<hash>:admin,alertmanager:<hash>:user,grafana:<hash>:user' \
-  NTFY_AUTH_TOKENS='alertmanager:<am-token>:Alertmanager,grafana:<grafana-token>:Grafana'
+  NTFY_AUTH_USERS='felix:<hash>:admin,alertmanager:<hash>:user,grafana:<hash>:user,wallos:<hash>:user' \
+  NTFY_AUTH_TOKENS='alertmanager:<am-token>:Alertmanager,grafana:<grafana-token>:Grafana,wallos:<wallos-token>:Wallos'
 
 vault kv put k3s-infra/monitoring/ntfy token='<am-token>'
 vault kv put k3s-infra/grafana/ntfy token='<grafana-token>'
