@@ -21,8 +21,7 @@ spec:
         app.kubernetes.io/name: wallos
     spec:
       securityContext:
-        # www-data in the image, so the freshly provisioned volume is writable.
-        fsGroup: 33
+        fsGroup: 82
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -42,6 +41,8 @@ spec:
               value: "true"
             - name: OIDC_DISABLE_PASSWORD_LOGIN
               value: "true"
+            - name: SSRF_ALLOWLIST
+              value: "sso.int.felixwallner.com"
           envFrom:
             - secretRef:
                 name: wallos-auth
@@ -54,13 +55,13 @@ spec:
               subPath: logos
           readinessProbe:
             httpGet:
-              path: /
+              path: /health.php
               port: http
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /
+              path: /health.php
               port: http
             initialDelaySeconds: 30
             periodSeconds: 30
