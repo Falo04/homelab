@@ -41,6 +41,8 @@ spec:
               value: "true"
             - name: OIDC_DISABLE_PASSWORD_LOGIN
               value: "true"
+            - name: OIDC_REQUIRE_EMAIL_VERIFIED
+              value: "false"
             - name: SSRF_ALLOWLIST
               value: "sso.int.felixwallner.com"
           envFrom:
