@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v3.7
+    image: traefik:v3.7.13
     container_name: traefik
     restart: unless-stopped
     security_opt:
@@ -64,7 +64,7 @@ services:
       - CLOUDFLARE_TTL=${TTL}
 
   vault:
-    image: hashicorp/vault:2.0.3
+    image: hashicorp/vault:2.1.0
     container_name: vault
     hostname: vault
     command: server
