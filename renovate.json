@@ -1,0 +1,40 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "pre-commit": { "enabled": true },
+  "argocd": {
+    "managerFilePatterns": ["/^apps/.+\\.ya?ml$/", "/^bootstrap/.+\\.ya?ml$/"]
+  },
+  "kubernetes": {
+    "managerFilePatterns": ["/^apps/.+\\.ya?ml$/"]
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Argo CD chart version in the bootstrap script",
+      "managerFilePatterns": ["/^scripts/bootstrap-argocd\\.sh$/"],
+      "matchStrings": ["CHART_VERSION=\"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "helm",
+      "depNameTemplate": "argo-cd",
+      "registryUrlTemplate": "https://argoproj.github.io/argo-helm"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Update Argo CD Application and bootstrap script together",
+      "matchDepNames": ["argo-cd"],
+      "groupName": "argo-cd"
+    },
+    {
+      "description": "Vault: no downgrades, step one minor at a time, manual approval",
+      "matchDepNames": ["hashicorp/vault"],
+      "separateMultipleMinor": true,
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Let new releases settle before proposing them",
+      "matchUpdateTypes": ["major", "minor"],
+      "minimumReleaseAge": "3 days"
+    }
+  ]
+}

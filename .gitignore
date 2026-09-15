@@ -1,6 +1,7 @@
 # Secrets
 *.env
 cloudflare-token.txt
+.op
 
 # Vault data (Raft storage + unseal state)
 vault/vault1/data/
