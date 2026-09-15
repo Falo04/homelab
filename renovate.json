@@ -34,7 +34,7 @@
     {
       "description": "Let new releases settle before proposing them",
       "matchUpdateTypes": ["major", "minor"],
-      "minimumReleaseAge": "3 days"
+      "minimumReleaseAge": "7 days"
     }
   ]
 }
