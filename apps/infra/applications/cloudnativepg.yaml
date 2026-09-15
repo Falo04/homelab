@@ -10,7 +10,7 @@ spec:
   source:
     path: releases/
     repoURL: https://github.com/cloudnative-pg/cloudnative-pg.git
-    targetRevision: v1.26.0
+    targetRevision: v1.26.3
     directory:
       recurse: false
       include: "cnpg-1.26.0.yaml"
