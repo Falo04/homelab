@@ -1,0 +1,24 @@
+# Namespaced, so the name is a constant across apps. Referenced from each
+# Cluster via `spec.plugins[].parameters.barmanObjectName`.
+# `destinationPath` is filled in from the app's cnpg-backup-values ConfigMap.
+---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: garage-store
+spec:
+  retentionPolicy: "30d"
+  configuration:
+    destinationPath: s3://REPLACED-BY-VALUES/
+    endpointURL: https://s3.nas.felixwallner.com
+    s3Credentials:
+      accessKeyId:
+        name: cnpg-backup-s3
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: cnpg-backup-s3
+        key: ACCESS_SECRET_KEY
+    data:
+      compression: gzip
+    wal:
+      compression: gzip
