@@ -1,15 +1,21 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+namespace: ntfy
+
 resources:
   - namespace.yaml
   - vault-auth.yaml
   - auth-secret.yaml
+  - backup-values.yaml
   - postgres.yaml
   - deployment.yaml
   - servicemonitor.yaml
   - ntfy-cert.yaml
   - ntfy-ingress.yaml
+
+components:
+  - ../../../base/cnpg-backup
 
 configMapGenerator:
   - name: ntfy-config
