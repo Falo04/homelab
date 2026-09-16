@@ -1,0 +1,10 @@
+# Values for the ../../../base/cnpg-backup component.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cnpg-backup-values
+data:
+  clusterName: ntfy-postgres
+  destinationPath: s3://ntfy-bucket/
+  vaultPath: ntfy/backup
