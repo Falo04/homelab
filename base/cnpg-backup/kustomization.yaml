@@ -1,0 +1,76 @@
+# Barman-cloud backups for one CNPG cluster: ObjectStore, ScheduledBackup and
+# the Vault-backed Garage credentials.
+#
+# Usage — in the app's kustomization.yaml:
+#
+#   namespace: <app>
+#   resources:
+#     - backup-values.yaml    # see below
+#     - postgres.yaml
+#   components:
+#     - ../base/cnpg-backup
+#
+# and a backup-values.yaml next to it:
+#
+#   apiVersion: v1
+#   kind: ConfigMap
+#   metadata:
+#     name: cnpg-backup-values
+#   data:
+#     clusterName: <app>-postgres
+#     destinationPath: s3://<app>-bucket/
+#     vaultPath: <app>/backup
+#
+# Finally, attach the plugin to the Cluster in postgres.yaml:
+#
+#   spec:
+#     plugins:
+#       - name: barman-cloud.cloudnative-pg.io
+#         isWALArchiver: true
+#         parameters:
+#           barmanObjectName: garage-store
+#
+# Everything else (endpoint, retention, schedule, compression) is a shared
+# default here; override per app with a `patches:` entry if one needs to differ.
+---
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - backup-secret.yaml
+  - objectstore.yaml
+  - scheduled-backup.yaml
+
+replacements:
+  - source:
+      kind: ConfigMap
+      name: cnpg-backup-values
+      fieldPath: data.clusterName
+    targets:
+      - select:
+          kind: ScheduledBackup
+          name: cnpg-backup
+        fieldPaths:
+          - spec.cluster.name
+
+  - source:
+      kind: ConfigMap
+      name: cnpg-backup-values
+      fieldPath: data.destinationPath
+    targets:
+      - select:
+          kind: ObjectStore
+          name: garage-store
+        fieldPaths:
+          - spec.configuration.destinationPath
+
+  - source:
+      kind: ConfigMap
+      name: cnpg-backup-values
+      fieldPath: data.vaultPath
+    targets:
+      - select:
+          kind: VaultStaticSecret
+          name: vault-cnpg-backup
+        fieldPaths:
+          - spec.path
