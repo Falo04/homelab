@@ -8,3 +8,7 @@ resources:
   - postgres.yaml
   - authentik-cert.yaml
   - authentik-ingress.yaml
+  - backup-values.yaml
+
+components:
+  - ../../../base/cnpg-backup
