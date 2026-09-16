@@ -7,7 +7,7 @@
     "managerFilePatterns": ["/^apps/.+\\.ya?ml$/", "/^bootstrap/.+\\.ya?ml$/"]
   },
   "kubernetes": {
-    "managerFilePatterns": ["/^apps/.+\\.ya?ml$/"]
+    "managerFilePatterns": ["/^apps/.+\\.ya?ml$/", "/^base/.+\\.ya?ml$/"]
   },
   "customManagers": [
     {
