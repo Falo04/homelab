@@ -17,9 +17,17 @@ command -v kustomize >/dev/null || {
 # starts to.
 failed=()
 built=0
+skipped=0
 
 while IFS= read -r kustomization; do
   dir="$(dirname "$kustomization")"
+
+  if grep -qE '^kind:[[:space:]]*Component[[:space:]]*$' "$kustomization"; then
+    echo "==> $dir (component, skipped)"
+    skipped=$((skipped + 1))
+    continue
+  fi
+
   echo "==> $dir"
 
   if kustomize build "$dir" >/dev/null; then
@@ -40,4 +48,4 @@ if ((${#failed[@]})); then
 fi
 
 echo
-echo "built $built kustomizations"
+echo "built $built kustomizations, skipped $skipped components"
