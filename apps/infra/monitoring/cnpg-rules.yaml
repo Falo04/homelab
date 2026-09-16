@@ -41,9 +41,6 @@ spec:
           labels:
             severity: warning
 
-        # Dormant until WAL archiving is configured: with no archiver activity
-        # both timestamps sit at 0, so the difference never crosses the
-        # threshold. Kept so backups arrive already covered.
         - alert: LastFailedArchiveTime
           annotations:
             description: Archiving failed for {{ $labels.pod }}

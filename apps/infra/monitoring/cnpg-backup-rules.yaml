@@ -1,0 +1,75 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cnpg-backup-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: cloudnative-pg
+spec:
+  groups:
+    - name: cnpg-backup.rules
+      rules:
+        # The most recent attempt failed and nothing has succeeded since.
+        # Before the first backup both sides are 0, so this stays quiet.
+        - alert: CNPGBackupFailed
+          annotations:
+            summary: CNPG backup failed for {{ $labels.pod }}
+            description: >-
+              The most recent barman-cloud backup attempt for {{ $labels.pod }}
+              in {{ $labels.namespace }} failed and no later backup has
+              succeeded.
+          expr: |-
+            barman_cloud_cloudnative_pg_io_last_failed_backup_timestamp
+              > barman_cloud_cloudnative_pg_io_last_available_backup_timestamp
+          for: 5m
+          labels:
+            severity: critical
+
+        # Backups silently stopped running: no explicit failure, just nothing
+        # new.
+        - alert: CNPGBackupTooOld
+          annotations:
+            summary: CNPG backup for {{ $labels.pod }} is over 26h old
+            description: >-
+              The last successful barman-cloud backup for {{ $labels.pod }} in
+              {{ $labels.namespace }} completed
+              {{ $value | humanizeDuration }} ago. The schedule may have
+              stopped running.
+          expr: |-
+            (time() - barman_cloud_cloudnative_pg_io_last_available_backup_timestamp) > 26 * 3600
+              and barman_cloud_cloudnative_pg_io_last_available_backup_timestamp > 0
+          for: 30m
+          labels:
+            severity: critical
+
+        # No backup has *ever* succeeded. Catches a cluster with no
+        # ScheduledBackup at all, and the case where the very first backup
+        # failed and left the timestamp pinned at 0 where staleness can't see
+        # it. 6h is long enough to cover initial cluster bring-up.
+        - alert: CNPGNoSuccessfulBackup
+          annotations:
+            summary: CNPG cluster {{ $labels.pod }} has never been backed up
+            description: >-
+              No barman-cloud backup has ever completed for {{ $labels.pod }}
+              in {{ $labels.namespace }}. Check that a ScheduledBackup exists
+              and that the object store credentials are valid.
+          expr: |-
+            barman_cloud_cloudnative_pg_io_last_available_backup_timestamp == 0
+          for: 6h
+          labels:
+            severity: warning
+
+        # WAL segments piling up unshipped. More urgent than a failed base
+        # backup: PITR is broken and pg_wal will eventually fill the PVC.
+        - alert: CNPGWALArchiveStuck
+          annotations:
+            summary: WAL archiving is backing up on {{ $labels.pod }}
+            description: >-
+              {{ $value }} WAL segments are waiting to be archived on
+              {{ $labels.pod }} in {{ $labels.namespace }}. Point-in-time
+              recovery is broken and the WAL volume will fill.
+          expr: |-
+            cnpg_collector_pg_wal_archive_status{value="ready"} > 20
+          for: 15m
+          labels:
+            severity: critical
