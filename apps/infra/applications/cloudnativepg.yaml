@@ -7,13 +7,18 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: infra-apps-project
-  source:
-    path: releases/
-    repoURL: https://github.com/cloudnative-pg/cloudnative-pg.git
-    targetRevision: v1.26.3
-    directory:
-      recurse: false
-      include: "cnpg-1.26.0.yaml"
+  sources:
+    - path: releases/
+      repoURL: https://github.com/cloudnative-pg/cloudnative-pg.git
+      targetRevision: v1.30.0
+      directory:
+        recurse: false
+        include: "cnpg-1.30.0.yaml"
+
+    - repoURL: https://cloudnative-pg.github.io/charts
+      chart: plugin-barman-cloud
+      targetRevision: 0.15.0
+
   destination:
     namespace: cnpg-system
     server: https://kubernetes.default.svc
