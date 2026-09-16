@@ -13,6 +13,7 @@ resources:
   - servicemonitor.yaml
   - ntfy-cert.yaml
   - ntfy-ingress.yaml
+  - postgres-test.yaml
 
 components:
   - ../../../base/cnpg-backup
