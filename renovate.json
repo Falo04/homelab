@@ -1,6 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended", "customManagers:githubActionsVersions"],
+  "prHourlyLimit": 0,
   "pre-commit": { "enabled": true },
   "argocd": {
     "managerFilePatterns": ["/^apps/.+\\.ya?ml$/", "/^bootstrap/.+\\.ya?ml$/"]
