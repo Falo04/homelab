@@ -12,7 +12,8 @@ spec:
       source: garage
   externalClusters:
     - name: garage
-      plugin: barman-cloud.cloudnative-pg.io
-      parameters:
-        barmanObjectName: garage-store
-        serverName: ntfy-postgres
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: garage-store
+          serverName: ntfy-postgres
