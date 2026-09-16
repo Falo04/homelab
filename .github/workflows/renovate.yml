@@ -13,4 +13,6 @@ jobs:
           token: ${{ secrets.RENOVATE_TOKEN }}
         env:
           RENOVATE_REPOSITORIES: Falo04/homelab
+          RENOVATE_GIT_PRIVATE_KEY: ${{ secrets.RENOVATE_GIT_PRIVATE_KEY }}
+          RENOVATE_GIT_AUTHOR: "Renovate <85020353+Falo04@users.noreply.github.com>"
           LOG_LEVEL: info
