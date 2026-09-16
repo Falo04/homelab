@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cnpg-backup-values
+data:
+  clusterName: authentik-postgres
+  destinationPath: s3://authentik-bucket/
+  vaultPath: authentik/backup
