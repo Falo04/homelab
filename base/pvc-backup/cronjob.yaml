@@ -1,0 +1,181 @@
+# File-level backup of one PersistentVolumeClaim into a restic repository on
+# Garage. local-path PVs are hostPath, so there is no CSI driver and no
+# VolumeSnapshot to lean on, the only way out is to mount the volume and read
+# it.
+#
+# The volume is mounted read-only everywhere: a backup job must never be able
+# to damage live data.
+#
+# Two stages, because a live SQLite file cannot be copied safely:
+#   1. sqlite-snapshot  asks SQLite for a consistent copy of each database
+#                       listed in `sqliteDatabases`, into an emptyDir.
+#   2. restic           backs up the volume *minus* those live database files,
+#                       plus the consistent copies from stage 1.
+#
+# Apps with no SQLite leave `sqliteDatabases` empty; then stage 1 is a no-op
+# and the whole volume is backed up as-is.
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pvc-backup
+spec:
+  schedule: "30 3 * * *"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 3600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            runAsGroup: 65534
+            seccompProfile:
+              type: RuntimeDefault
+          initContainers:
+            - name: sqlite-snapshot
+              image: alpine/sqlite:3.53.4
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              command:
+                - /bin/sh
+                - -ceu
+                - |
+                  [ -n "${SQLITE_DATABASES:-}" ] || {
+                    echo "no sqlite databases configured, nothing to snapshot"
+                    exit 0
+                  }
+
+                  for db in $SQLITE_DATABASES; do
+                    src="/data/$db"
+                    out="/staging/sqlite/$(basename "$db")"
+                    mkdir -p "$(dirname "$out")"
+                    echo "snapshotting $src -> $out"
+
+                    sqlite3 "file:$src?mode=ro" \
+                      ".timeout 30000" \
+                      ".backup '$out'"
+
+                    check="$(sqlite3 "$out" "pragma integrity_check;")"
+                    if [ "$check" != "ok" ]; then
+                      echo "integrity check failed for $out: $check" >&2
+                      exit 1
+                    fi
+                    echo "  ok, $(wc -c <"$out") bytes"
+                  done
+              env:
+                - name: SQLITE_DATABASES
+                  value: REPLACED-BY-VALUES
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+                  readOnly: true
+                - name: staging
+                  mountPath: /staging
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 64Mi
+                limits:
+                  cpu: 500m
+                  memory: 256Mi
+          containers:
+            - name: restic
+              image: restic/restic:0.19.1
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              command:
+                - /bin/sh
+                - -ceu
+                - |
+                  excludes=""
+                  for db in ${SQLITE_DATABASES:-}; do
+                    for suffix in "" -journal -wal -shm; do
+                      excludes="$excludes --exclude=/data/$db$suffix"
+                    done
+                  done
+
+                  # First run of a new bucket has no repository yet.
+                  restic cat config >/dev/null 2>&1 || restic init
+
+                  restic backup /data /staging \
+                    --host "$RESTIC_HOST" \
+                    --tag pvc \
+                    --exclude-caches \
+                    $excludes
+
+                  restic forget \
+                    --host "$RESTIC_HOST" \
+                    --tag pvc \
+                    --keep-daily 7 \
+                    --keep-weekly 4 \
+                    --keep-monthly 6 \
+                    --prune
+
+                  restic snapshots --host "$RESTIC_HOST" --tag pvc --latest 1
+              env:
+                - name: RESTIC_REPOSITORY
+                  value: REPLACED-BY-VALUES
+                # Snapshots are grouped by host, so one repository can hold
+                # several PVCs without their retention policies colliding.
+                - name: RESTIC_HOST
+                  value: REPLACED-BY-VALUES
+                - name: SQLITE_DATABASES
+                  value: REPLACED-BY-VALUES
+                - name: RESTIC_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: pvc-backup-s3
+                      key: RESTIC_PASSWORD
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: pvc-backup-s3
+                      key: ACCESS_KEY_ID
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: pvc-backup-s3
+                      key: ACCESS_SECRET_KEY
+                - name: AWS_DEFAULT_REGION
+                  value: garage
+                - name: RESTIC_CACHE_DIR
+                  value: /cache
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+                  readOnly: true
+                - name: staging
+                  mountPath: /staging
+                  readOnly: true
+                - name: cache
+                  mountPath: /cache
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: "1"
+                  memory: 1Gi
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: REPLACED-BY-VALUES
+                readOnly: true
+            - name: staging
+              emptyDir:
+                sizeLimit: 2Gi
+            - name: cache
+              emptyDir:
+                sizeLimit: 2Gi

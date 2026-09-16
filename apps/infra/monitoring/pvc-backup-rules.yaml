@@ -1,0 +1,64 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pvc-backup-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: pvc-backup
+spec:
+  groups:
+    - name: pvc-backup.rules
+      rules:
+        # The newest failed run started after the last successful one.
+        - alert: PVCBackupFailed
+          annotations:
+            summary: PVC backup failed in {{ $labels.namespace }}
+            description: >-
+              The most recent pvc-backup run in {{ $labels.namespace }} failed
+              and no later run has succeeded. Check the job logs: a failing
+              sqlite integrity check fails the job on purpose rather than
+              shipping a bad copy.
+          expr: |-
+            max by (namespace) (
+              kube_job_status_start_time
+                * on (namespace, job_name) (kube_job_failed{condition="true"} == 1)
+                * on (namespace, job_name) kube_job_owner{owner_kind="CronJob", owner_name="pvc-backup"}
+            )
+              > on (namespace)
+            max by (namespace) (kube_cronjob_status_last_successful_time{cronjob="pvc-backup"})
+          for: 5m
+          labels:
+            severity: critical
+
+        # Backups silently stopped running: no explicit failure, just nothing
+        # new. 26h leaves room for a late start on a daily schedule.
+        - alert: PVCBackupTooOld
+          annotations:
+            summary: PVC backup in {{ $labels.namespace }} is over 26h old
+            description: >-
+              The last successful pvc-backup run in {{ $labels.namespace }}
+              completed {{ $value | humanizeDuration }} ago. The schedule may
+              have stopped running.
+          expr: |-
+            (time() - kube_cronjob_status_last_successful_time{cronjob="pvc-backup"}) > 26 * 3600
+          for: 30m
+          labels:
+            severity: critical
+
+        # No run has *ever* succeeded. kube-state-metrics omits
+        # `last_successful_time` entirely until the first success, so absence
+        # is the signal, staleness above cannot see this case at all.
+        # 6h covers initial bring-up plus the daily schedule.
+        - alert: PVCNoSuccessfulBackup
+          annotations:
+            summary: PVC backup in {{ $labels.namespace }} has never succeeded
+            description: >-
+              A pvc-backup CronJob exists in {{ $labels.namespace }} but has
+              never completed successfully. Check that the Garage bucket exists
+              and that RESTIC_PASSWORD is present at the configured Vault path.
+          expr: |-
+            kube_cronjob_info{cronjob="pvc-backup"} == 1
+              unless on (namespace) kube_cronjob_status_last_successful_time{cronjob="pvc-backup"}
+          for: 6h
+          labels:
+            severity: warning

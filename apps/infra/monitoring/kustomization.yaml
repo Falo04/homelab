@@ -7,3 +7,4 @@ resources:
   - ntfy-secret.yaml
   - cnpg-rules.yaml
   - cnpg-backup-rules.yaml
+  - pvc-backup-rules.yaml
