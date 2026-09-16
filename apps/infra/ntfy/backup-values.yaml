@@ -7,4 +7,5 @@ metadata:
 data:
   clusterName: ntfy-postgres
   destinationPath: s3://ntfy-bucket/
+  vaultMount: k3s-infra
   vaultPath: ntfy/backup
