@@ -74,3 +74,13 @@ replacements:
           name: vault-cnpg-backup
         fieldPaths:
           - spec.path
+  - source:
+      kind: ConfigMap
+      name: cnpg-backup-values
+      fieldPath: data.vaultMount
+    targets:
+      - select:
+          kind: VaultStaticSecret
+          name: vault-cnpg-backup
+        fieldPaths:
+          - spec.mount

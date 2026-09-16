@@ -20,6 +20,7 @@ metadata:
 data:
   clusterName: <app>-postgres
   destinationPath: s3://<app>-bucket/
+  vaultMount: k3s-<type>
   vaultPath: <app>/backup
 ```
 
