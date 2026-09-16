@@ -10,11 +10,12 @@ spec:
     - https://argoproj.github.io/argo-helm
     - https://helm.releases.hashicorp.com
     - https://traefik.github.io/charts
-    - oci://quay.io/jetstack/charts/cert-manager
+    - quay.io/jetstack/charts
     - ghcr.io/tailscale/tailscale
     - https://helm.cilium.io/
     - https://charts.goauthentik.io
     - https://github.com/cloudnative-pg/cloudnative-pg.git
+    - https://cloudnative-pg.github.io/charts
     - https://grafana.github.io/helm-charts
     - https://prometheus-community.github.io/helm-charts
   destinations:
