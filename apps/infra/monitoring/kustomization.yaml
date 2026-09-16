@@ -6,3 +6,4 @@ resources:
   - vault-auth.yaml
   - ntfy-secret.yaml
   - cnpg-rules.yaml
+  - cnpg-backup-rules.yaml
