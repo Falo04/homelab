@@ -31,17 +31,13 @@ spec:
           ports:
             - name: http
               containerPort: 80
+          # Capability dropping was tried here and reverted. The image's
+          # startup.sh chmods /tmp, which needs CAP_FOWNER -- uid 0 is not
+          # enough once capabilities are dropped -- and the script runs under
+          # `set -e`, so the EPERM kills the container. A retry needs FOWNER at
+          # minimum and must be tested against a running pod, not reasoned out.
           securityContext:
             allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-              add:
-                - CHOWN
-                - SETUID
-                - SETGID
-                - NET_BIND_SERVICE
-                - DAC_OVERRIDE
           env:
             - name: TZ
               value: "Europe/Berlin"
