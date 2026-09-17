@@ -161,6 +161,8 @@ spec:
                   readOnly: true
                 - name: cache
                   mountPath: /cache
+                - name: tmp
+                  mountPath: /tmp
               resources:
                 requests:
                   cpu: 100m
@@ -179,3 +181,6 @@ spec:
             - name: cache
               emptyDir:
                 sizeLimit: 2Gi
+            - name: tmp
+              emptyDir:
+                sizeLimit: 1Gi
