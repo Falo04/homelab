@@ -4,12 +4,14 @@ kind: Kustomization
 namespace: argocd
 
 resources:
+  - alloy.yaml
   - argocd.yaml
   - authentik.yaml
   - cert-manager.yaml
   - cloudnativepg.yaml
   - grafana.yaml
   - kube-prometheus-stack.yaml
+  - loki.yaml
   - ntfy.yaml
   - traefik.yaml
   - vault-secrets-operator.yaml
