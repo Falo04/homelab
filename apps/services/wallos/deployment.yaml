@@ -20,6 +20,7 @@ spec:
       labels:
         app.kubernetes.io/name: wallos
     spec:
+      automountServiceAccountToken: false
       securityContext:
         fsGroup: 82
         seccompProfile:
@@ -32,6 +33,15 @@ spec:
               containerPort: 80
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - CHOWN
+                - SETUID
+                - SETGID
+                - NET_BIND_SERVICE
+                - DAC_OVERRIDE
           env:
             - name: TZ
               value: "Europe/Berlin"

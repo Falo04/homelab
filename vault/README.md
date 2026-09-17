@@ -20,7 +20,7 @@ about Vault is exposed to the internet.
   - Zone → DNS → Edit
   - Zone → Zone → Read
 - **Tailscale installed and up on the Docker host** (`tailscale up`). This is a
-  host-level install, *not* a compose service. (will change in the future to compose service)
+  host-level install, _not_ a compose service. (will change in the future to compose service)
 
 ## Setup
 
@@ -82,10 +82,9 @@ with `export VAULT_ADDR=https://vault.${DOMAIN}`.
 
 ## Upgrading
 
-Images are pinned in `vault/docker-compose.yml`. Upgrade by editing the tag →
-pull → recreate → verify.
+Images are pinned in [`docker-compose.yml`](./docker-compose.yml).
 
-**Vault** (`hashicorp/vault:1.13.3`) — **no downgrades**; once data is written by
+**Vault** — **no downgrades**; once data is written by
 a newer version an older binary may refuse to start. Before upgrading, back up
 `vault/vault1/data/` and take a snapshot:
 
@@ -107,5 +106,5 @@ Don't skip more than one minor line without checking the
 To roll back a bad upgrade: restore the backed-up `data/` (or the snapshot), pin
 the previous tag, `just up`, unseal.
 
-**Traefik** (`traefik:v3.7`) — stateless aside from the ACME store
+**Traefik** — stateless aside from the ACME store
 (`acme` volume). `just update` pulls and recreates it too.
