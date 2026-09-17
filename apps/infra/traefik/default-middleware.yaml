@@ -6,6 +6,7 @@ metadata:
 spec:
   headers:
     contentTypeNosniff: true
+    frameDeny: true
     referrerPolicy: "same-origin"
 
     forceSTSHeader: true

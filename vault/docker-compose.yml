@@ -67,6 +67,9 @@ services:
     image: hashicorp/vault:2.1.0
     container_name: vault
     hostname: vault
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     command: server
     environment:
       - VAULT_ADDR=http://127.0.0.1:8200

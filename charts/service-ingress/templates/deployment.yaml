@@ -22,6 +22,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 101
@@ -34,6 +35,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop:
                 - ALL
@@ -49,6 +51,8 @@ spec:
             - name: tls
               mountPath: /etc/nginx/tls
               readOnly: true
+            - name: tmp
+              mountPath: /tmp
           livenessProbe:
             tcpSocket:
               port: https
@@ -68,3 +72,6 @@ spec:
         - name: tls
           secret:
             secretName: {{ .Values.tlsSecret }}
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
