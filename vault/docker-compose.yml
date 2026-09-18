@@ -64,7 +64,7 @@ services:
       - CLOUDFLARE_TTL=${TTL}
 
   vault:
-    image: hashicorp/vault:2.1.0
+    image: hashicorp/vault:2.1.1
     container_name: vault
     hostname: vault
     restart: unless-stopped
