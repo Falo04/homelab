@@ -80,6 +80,18 @@ Vault must be unsealed again after every container restart (unless you configure
 auto-unseal). From your workstation (on the LAN or tailnet) point the CLI at it
 with `export VAULT_ADDR=https://vault.${DOMAIN}`.
 
+## Backups
+
+The `vault-backup` container takes an hourly raft snapshot into a restic
+repository on Garage. Setup, retention and the restore procedure are in
+[docs/vault-backup.md](/docs/vault-backup.md); it needs a `vault-backup.env` in
+this directory before `just up`.
+
+```bash
+just backup-status     # newest snapshots
+just backup-now        # take one immediately
+```
+
 ## Upgrading
 
 Images are pinned in [`docker-compose.yml`](./docker-compose.yml).
@@ -104,7 +116,9 @@ just exec vault vault status            # check Version + Sealed=false
 Don't skip more than one minor line without checking the
 [upgrade guides](https://developer.hashicorp.com/vault/docs/upgrading/upgrade-guides).
 To roll back a bad upgrade: restore the backed-up `data/` (or the snapshot), pin
-the previous tag, `just up`, unseal.
+the previous tag, `just up`, unseal. The hourly snapshots are a second escape
+hatch — `just backup-restore` and follow
+[docs/vault-backup.md](/docs/vault-backup.md).
 
 **Traefik** — stateless aside from the ACME store
 (`acme` volume). `just update` pulls and recreates it too.

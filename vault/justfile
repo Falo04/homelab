@@ -38,3 +38,16 @@ lint:
 # Run a one-off command in a service, e.g. `just exec vault sh`
 exec service +cmd:
     {{dc}} exec {{service}} {{cmd}}
+
+# Run a Vault snapshot backup now (the loop takes one on every start)
+backup-now:
+    {{dc}} restart vault-backup
+
+# Show the most recent Vault snapshots in the restic repository
+backup-status:
+    {{dc}} run --rm --entrypoint restic vault-backup snapshots --host vault --tag vault --latest 5
+
+# Pull a snapshot out of the repository into ./restore (default: the newest)
+backup-restore snapshot="latest":
+    {{dc}} run --rm -v ./restore:/restore --entrypoint restic vault-backup \
+        restore {{snapshot}} --host vault --target /restore

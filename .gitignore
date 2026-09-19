@@ -5,3 +5,6 @@ cloudflare-token.txt
 
 # Vault data (Raft storage + unseal state)
 vault/vault1/data/
+
+# Vault snapshots pulled out of restic for a restore
+vault/restore/

@@ -13,6 +13,7 @@ auth-access:
   - "alertmanager:homelab-alerts:wo"
   - "grafana:homelab-alerts:wo"
   - "wallos:wallos:wo"
+  - "vault-backup:homelab-alerts:wo"
 
 # Keep missed notifications around for phones that were offline for a while.
 cache-duration: "72h"

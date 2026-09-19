@@ -91,6 +91,31 @@ services:
       - "traefik.http.routers.vault.tls.certresolver=letsencrypt"
       - "traefik.http.services.vault.loadbalancer.server.port=8200"
 
+  vault-backup:
+    image: restic/restic:0.19.1
+    container_name: vault-backup
+    restart: unless-stopped
+    depends_on:
+      - vault
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      proxy:
+    entrypoint: ["/bin/sh", "/usr/local/bin/vault-backup.sh"]
+    volumes:
+      - ./vault-backup.sh:/usr/local/bin/vault-backup.sh:ro
+      - vault_backup_cache:/cache
+    tmpfs:
+      - /tmp:size=512m
+    env_file:
+      - vault-backup.env
+    environment:
+      - VAULT_ADDR=http://vault:8200
+      - RESTIC_REPOSITORY=s3:https://s3.nas.felixwallner.com/vault-bucket/restic
+      - RESTIC_CACHE_DIR=/cache
+      - AWS_DEFAULT_REGION=garage
+      - NTFY_URL=https://ntfy.${DOMAIN}/homelab-alerts
+
 networks:
   proxy:
 
@@ -98,6 +123,7 @@ volumes:
   acme:
   traefik:
   cloudflare:
+  vault_backup_cache:
 
 secrets:
   cf_token:
