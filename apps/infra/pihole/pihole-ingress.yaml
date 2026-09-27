@@ -13,5 +13,5 @@ spec:
       match: Host(`pihole.int.felixwallner.com`)
       priority: 10
       services:
-        - name: pihole-server
+        - name: pihole-web
           port: 80

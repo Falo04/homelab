@@ -19,17 +19,16 @@ spec:
             enabled: true
 
           admin: 
-            exsitingSecret:
-              valueFrom:
-                secretKeyRef:
-                  name: pihole-auth
-                  key: PIHOLE_ADMIN
+            existingSecret: "pihole-auth"
+            passwordKey: "PIHOLE_ADMIN"
 
           serviceDns:
             mixedService: true
 
           serviceDhcp:
-            enabled: false
+            mixedService: true
+            type: LoadBalancer
+            LoadBalancerIP: 192.168.178.211
 
           podDnsConfig:
             enabled: false
