@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd
+  namespace: argocd
+spec:
+  project: infra-apps-project
+  sources:
+    - repoURL: https://mojo2600.github.io/pihole-kubernetes/
+      chart: pihole
+      targetRevision: 2.38.0
+      helm:
+        releaseName: pihole
+        values: |
+          DNS1: 9.9.9.9
+          DNS2: 1.1.1.1 
+
+          persistentVolumeClaim:
+            enabled: true
+
+          admin: 
+            exsitingSecret:
+              valueFrom:
+                secretKeyRef:
+                  name: pihole-auth
+                  key: PIHOLE_ADMIN
+
+          serviceDns:
+            mixedService: true
+
+          serviceDhcp:
+            enabled: false
+
+          podDnsConfig:
+            enabled: false
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: apps/infra/pihole
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: pihole
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
