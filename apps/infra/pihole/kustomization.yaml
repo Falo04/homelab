@@ -7,3 +7,5 @@ resources:
   - namespace.yaml
   - admin-secret.yaml
   - vault-auth.yaml
+  - pihole-cert.yaml
+  - pihole-ingress.yaml
