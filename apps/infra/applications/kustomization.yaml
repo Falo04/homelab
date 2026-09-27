@@ -16,3 +16,4 @@ resources:
   - traefik.yaml
   - vault-secrets-operator.yaml
   - vault-secrets.yaml
+  - pihole.yaml
