@@ -25,7 +25,7 @@ spec:
           serviceDns:
             mixedService: true
             type: LoadBalancer
-            loadBalancerIP: 192.168.178.211
+            loadBalancerIP: 192.168.178.212
 
 
           serviceDhcp:
