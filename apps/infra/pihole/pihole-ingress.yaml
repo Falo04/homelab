@@ -1,0 +1,17 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pihole-ingress
+  namespace: pihole
+spec:
+  entryPoints:
+    - tailscale
+  tls:
+    secretName: pihole-tls
+  routes:
+    - kind: Rule
+      match: Host(`pihole.int.felixwallner.com`)
+      priority: 10
+      services:
+        - name: pihole-server
+          port: 80

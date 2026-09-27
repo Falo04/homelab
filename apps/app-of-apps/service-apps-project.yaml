@@ -12,6 +12,8 @@ spec:
       namespace: argocd
     - server: https://kubernetes.default.svc
       namespace: wallos
+    - server: https://kubernetes.default.svc
+      namespace: pihole
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
