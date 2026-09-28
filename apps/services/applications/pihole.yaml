@@ -56,6 +56,20 @@ spec:
             mount: k3s-services
             path: pihole/tailscale
 
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/service-ingress
+      helm:
+        releaseName: pihole-ingress
+        valuesObject:
+          pod:
+            fullnameOverride: pihole-ingress
+          host: pihole.int.felixwallner.com
+          tlsSecret: pihole-tls
+          backend:
+            service: pihole-web
+            port: 80
+
   destination:
     server: https://kubernetes.default.svc
     namespace: pihole
