@@ -4,7 +4,7 @@ metadata:
   name: pihole
   namespace: argocd
 spec:
-  project: infra-apps-project
+  project: service-apps-project
   sources:
     - repoURL: https://mojo2600.github.io/pihole-kubernetes/
       chart: pihole
@@ -27,7 +27,6 @@ spec:
             type: LoadBalancer
             loadBalancerIP: 192.168.178.213
 
-
           serviceDhcp:
             enabled: false
 
@@ -36,7 +35,27 @@ spec:
 
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
-      path: apps/infra/pihole
+      path: apps/services/pihole
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/tailscale-node
+      helm:
+        releaseName: pihole-tailscale
+        valuesObject:
+          pod:
+            fullnameOverride: tailscale
+          tailscale:
+            hostname: pihole
+            tcpForward:
+              - port: 80
+                targetPort: 80
+                service: pihole-ingress
+          vault:
+            authRef: vault-k8s
+            mount: k3s-services
+            path: pihole/tailscale
+
   destination:
     server: https://kubernetes.default.svc
     namespace: pihole

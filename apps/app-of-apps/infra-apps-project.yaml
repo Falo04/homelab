@@ -44,8 +44,6 @@ spec:
       namespace: ntfy
     - server: https://kubernetes.default.svc
       namespace: loki
-    - server: https://kubernetes.default.svc
-      namespace: pihole
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
