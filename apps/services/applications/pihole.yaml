@@ -51,6 +51,9 @@ spec:
               - port: 80
                 targetPort: 80
                 service: pihole-ingress
+              - port: 443
+                targetPort: 443
+                service: pihole-ingress
           vault:
             authRef: vault-k8s
             mount: k3s-services
