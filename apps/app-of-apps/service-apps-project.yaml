@@ -7,6 +7,7 @@ spec:
   description: "All third party apps"
   sourceRepos:
     - https://github.com/Falo04/homelab.git
+    - https://mojo2600.github.io/pihole-kubernetes/
   destinations:
     - server: https://kubernetes.default.svc
       namespace: argocd
