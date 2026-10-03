@@ -17,7 +17,7 @@ spec:
 
     - repoURL: https://cloudnative-pg.github.io/charts
       chart: plugin-barman-cloud
-      targetRevision: 0.8.0
+      targetRevision: 0.8.1
 
   destination:
     namespace: cnpg-system
