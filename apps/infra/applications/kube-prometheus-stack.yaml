@@ -38,6 +38,7 @@ spec:
             prometheusSpec:
               retention: 15d
               retentionSize: 15GiB
+              enableRemoteWriteReceiver: true
               serviceMonitorSelectorNilUsesHelmValues: false
               podMonitorSelectorNilUsesHelmValues: false
               ruleSelectorNilUsesHelmValues: false

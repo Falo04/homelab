@@ -5,81 +5,163 @@ metadata:
   namespace: argocd
 spec:
   project: infra-apps-project
-  source:
-    repoURL: https://grafana.github.io/helm-charts
-    chart: alloy
-    targetRevision: 1.12.1
-    helm:
-      releaseName: alloy
-      values: |
-        crds:
-          create: false
+  sources:
+    - repoURL: https://grafana.github.io/helm-charts
+      chart: alloy
+      targetRevision: 1.12.1
+      helm:
+        releaseName: alloy
+        values: |
+          crds:
+            create: false
 
-        alloy:
-          extraEnv:
-            - name: NODE_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: spec.nodeName
+          alloy:
+            extraEnv:
+              - name: NODE_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: spec.nodeName
 
-          configMap:
-            content: |
-              discovery.kubernetes "pods" {
-                role = "pod"
+            configMap:
+              content: |
+                discovery.kubernetes "pods" {
+                  role = "pod"
 
-                selectors {
-                  role  = "pod"
-                  field = "spec.nodeName=" + sys.env("NODE_NAME")
+                  selectors {
+                    role  = "pod"
+                    field = "spec.nodeName=" + sys.env("NODE_NAME")
+                  }
                 }
-              }
 
-              discovery.relabel "pods" {
-                targets = discovery.kubernetes.pods.targets
+                discovery.relabel "pods" {
+                  targets = discovery.kubernetes.pods.targets
 
-                rule {
-                  source_labels = ["__meta_kubernetes_namespace"]
-                  target_label  = "namespace"
+                  rule {
+                    source_labels = ["__meta_kubernetes_namespace"]
+                    target_label  = "namespace"
+                  }
+                  rule {
+                    source_labels = ["__meta_kubernetes_pod_name"]
+                    target_label  = "pod"
+                  }
+                  rule {
+                    source_labels = ["__meta_kubernetes_pod_container_name"]
+                    target_label  = "container"
+                  }
+                  rule {
+                    source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+                    target_label  = "app"
+                  }
                 }
-                rule {
-                  source_labels = ["__meta_kubernetes_pod_name"]
-                  target_label  = "pod"
+
+                loki.source.kubernetes "pods" {
+                  targets    = discovery.relabel.pods.output
+                  forward_to = [loki.write.default.receiver]
                 }
-                rule {
-                  source_labels = ["__meta_kubernetes_pod_container_name"]
-                  target_label  = "container"
+
+                loki.write "default" {
+                  endpoint {
+                    url = "http://loki.loki.svc.cluster.local:3100/loki/api/v1/push"
+                  }
                 }
-                rule {
-                  source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
-                  target_label  = "app"
+
+                otelcol.receiver.otlp "default" {
+                  grpc {
+                    endpoint = "0.0.0.0:4317"
+                  }
+                  http {
+                    endpoint = "0.0.0.0:4318"
+                  }
+
+                  output {
+                    traces  = [otelcol.processor.batch.default.input]
+                    metrics = [otelcol.processor.batch.default.input]
+                    logs    = [otelcol.processor.batch.default.input]
+                  }
                 }
-              }
 
-              loki.source.kubernetes "pods" {
-                targets    = discovery.relabel.pods.output
-                forward_to = [loki.write.default.receiver]
-              }
-
-              loki.write "default" {
-                endpoint {
-                  url = "http://loki.loki.svc.cluster.local:3100/loki/api/v1/push"
+                otelcol.processor.batch "default" {
+                  output {
+                    traces  = [otelcol.exporter.otlp.tempo.input]
+                    metrics = [otelcol.exporter.prometheus.default.input]
+                    logs    = [otelcol.exporter.otlphttp.loki.input]
+                  }
                 }
-              }
 
-          resources:
-            requests:
-              cpu: 100m
-              memory: 128Mi
-            limits:
-              memory: 512Mi
+                otelcol.exporter.otlp "tempo" {
+                  client {
+                    endpoint = "tempo.tempo.svc.cluster.local:4317"
+                    tls {
+                      insecure = true
+                    }
+                  }
+                }
 
-        controller:
-          type: daemonset
+                otelcol.exporter.prometheus "default" {
+                  forward_to = [prometheus.remote_write.default.receiver]
+                }
 
-        serviceMonitor:
-          enabled: true
+                prometheus.remote_write "default" {
+                  endpoint {
+                    url = "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+                  }
+                }
+
+                // Loki's native OTLP endpoint keeps resource attributes as structured metadata.
+                otelcol.exporter.otlphttp "loki" {
+                  client {
+                    endpoint = "http://loki.loki.svc.cluster.local:3100/otlp"
+                  }
+                }
+
+            extraPorts:
+              - name: otlp-grpc
+                port: 4317
+                targetPort: 4317
+                protocol: TCP
+                appProtocol: grpc
+              - name: otlp-http
+                port: 4318
+                targetPort: 4318
+                protocol: TCP
+
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+
+          controller:
+            type: daemonset
+
+          serviceMonitor:
+            enabled: true
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: apps/infra/alloy
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/tailscale-node
+      helm:
+        releaseName: otel-tailscale
+        valuesObject:
+          tailscale:
+            hostname: otel
+            tcpForward:
+              - port: 4317
+                service: alloy
+              - port: 4318
+                service: alloy
+          vault:
+            authRef: vault-k8s
+            mount: k3s-infra
+            path: alloy/tailscale
   destination:
     server: https://kubernetes.default.svc
-    namespace: loki
+    namespace: alloy
   syncPolicy:
     automated:
       prune: true

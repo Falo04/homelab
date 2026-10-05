@@ -92,6 +92,32 @@ spec:
                   uid: loki
                   access: proxy
                   url: http://loki.loki.svc.cluster.local:3100
+                  jsonData:
+                    derivedFields:
+                      - name: TraceID
+                        matcherType: label
+                        matcherRegex: trace_id
+                        datasourceUid: tempo
+                        url: "$${__value.raw}"
+                - name: Tempo
+                  type: tempo
+                  uid: tempo
+                  access: proxy
+                  url: http://tempo.tempo.svc.cluster.local:3200
+                  jsonData:
+                    nodeGraph:
+                      enabled: true
+                    serviceMap:
+                      datasourceUid: prometheus
+                    tracesToLogsV2:
+                      datasourceUid: loki
+                      filterByTraceID: true
+                      spanStartTimeShift: -5m
+                      spanEndTimeShift: 5m
+                    tracesToMetrics:
+                      datasourceUid: prometheus
+                      spanStartTimeShift: -5m
+                      spanEndTimeShift: 5m
 
           alerting:
             contactpoints.yaml:
