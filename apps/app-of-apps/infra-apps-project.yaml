@@ -18,6 +18,7 @@ spec:
     - https://cloudnative-pg.github.io/charts
     - https://grafana.github.io/helm-charts
     - https://prometheus-community.github.io/helm-charts
+    - https://grafana-community.github.io/helm-charts
   destinations:
     - server: https://kubernetes.default.svc
       namespace: argocd
@@ -43,6 +44,10 @@ spec:
       namespace: ntfy
     - server: https://kubernetes.default.svc
       namespace: loki
+    - server: https://kubernetes.default.svc
+      namespace: tempo
+    - server: https://kubernetes.default.svc
+      namespace: alloy
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"

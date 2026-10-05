@@ -3,6 +3,8 @@
   "extends": ["config:recommended", "customManagers:githubActionsVersions"],
   "prHourlyLimit": 0,
   "prConcurrentLimit": 0,
+  "automerge": false,
+  "rebaseWhen": "behind-base-branch",
   "pre-commit": { "enabled": true },
   "argocd": {
     "managerFilePatterns": ["/^apps/.+\\.ya?ml$/", "/^bootstrap/.+\\.ya?ml$/"]

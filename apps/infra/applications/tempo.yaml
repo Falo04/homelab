@@ -1,0 +1,90 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tempo
+  namespace: argocd
+spec:
+  project: infra-apps-project
+  sources:
+    # grafana/tempo is deprecated; the chart moved to grafana-community.
+    - repoURL: https://grafana-community.github.io/helm-charts
+      chart: tempo
+      targetRevision: 2.3.0
+      helm:
+        releaseName: tempo
+        values: |
+          fullnameOverride: tempo
+
+          tempo:
+            reportingEnabled: false
+            retention: 168h
+
+            receivers:
+              otlp:
+                protocols:
+                  grpc:
+                    endpoint: 0.0.0.0:4317
+                  http:
+                    endpoint: 0.0.0.0:4318
+
+            storage:
+              trace:
+                backend: s3
+                s3:
+                  bucket: tempo-bucket
+                  endpoint: s3.nas.felixwallner.com
+                  region: garage
+                  forcepathstyle: true
+                  access_key: ${ACCESS_KEY_ID}
+                  secret_key: ${ACCESS_SECRET_KEY}
+                wal:
+                  path: /var/tempo/wal
+
+            # Span metrics + service graph, written back into Prometheus.
+            metricsGenerator:
+              enabled: true
+              remoteWriteUrl: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write
+              storage:
+                path: /var/tempo/generator/wal
+              traces_storage:
+                path: /var/tempo/generator/traces
+            overrides:
+              defaults:
+                metrics_generator:
+                  processors:
+                    - service-graphs
+                    - span-metrics
+
+            extraArgs:
+              config.expand-env: true
+            extraEnvFrom:
+              - secretRef:
+                  name: tempo-s3
+
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+
+          persistence:
+            enabled: true
+            size: 5Gi
+
+          serviceMonitor:
+            enabled: true
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: apps/infra/tempo
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tempo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

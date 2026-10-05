@@ -13,6 +13,7 @@ resources:
   - kube-prometheus-stack.yaml
   - loki.yaml
   - ntfy.yaml
+  - tempo.yaml
   - traefik.yaml
   - vault-secrets-operator.yaml
   - vault-secrets.yaml
