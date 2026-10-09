@@ -1,0 +1,60 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bookorbit
+  namespace: argocd
+spec:
+  project: service-apps-project
+  sources:
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: apps/services/bookorbit
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/tailscale-node
+      helm:
+        releaseName: bookorbit-tailscale
+        valuesObject:
+          pod:
+            fullnameOverride: tailscale
+          tailscale:
+            hostname: bookorbit
+            tcpForward:
+              - port: 443
+                targetPort: 443
+                service: bookorbit-ingress
+              - port: 80
+                targetPort: 80
+                service: bookorbit-ingress
+          vault:
+            authRef: vault-k8s
+            mount: k3s-services
+            path: bookorbit/tailscale
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/service-ingress
+      helm:
+        releaseName: bookorbit-ingress
+        valuesObject:
+          pod:
+            fullnameOverride: bookorbit-ingress
+          host: books.int.felixwallner.com
+          tlsSecret: bookorbit-tls
+          # Book uploads; illustrated EPUBs and PDFs easily exceed the default.
+          maxBodySize: 512m
+          backend:
+            service: bookorbit
+            port: 80
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: bookorbit
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

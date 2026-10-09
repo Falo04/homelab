@@ -6,3 +6,4 @@ namespace: argocd
 resources:
   - wallos.yaml
   - pihole.yaml
+  - bookorbit.yaml
