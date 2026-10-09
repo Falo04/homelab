@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pvc-backup-values
+data:
+  claimName: bookorbit-data
+  repository: s3:https://s3.nas.felixwallner.com/bookorbit-bucket/restic
+  vaultMount: k3s-services
+  vaultPath: bookorbit/backup
+  sqliteDatabases: ""
