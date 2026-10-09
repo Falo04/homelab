@@ -8,6 +8,10 @@ metadata:
   name: garage-store
 spec:
   retentionPolicy: "30d"
+  instanceSidecarConfiguration:
+    env:
+      - name: AWS_DEFAULT_REGION
+        value: garage
   configuration:
     destinationPath: s3://REPLACED-BY-VALUES/
     endpointURL: https://s3.nas.felixwallner.com
