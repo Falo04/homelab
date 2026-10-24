@@ -11,8 +11,6 @@ spec:
     - https://helm.releases.hashicorp.com
     - https://traefik.github.io/charts
     - https://charts.jetstack.io
-    - ghcr.io/tailscale/tailscale
-    - https://helm.cilium.io/
     - https://charts.goauthentik.io
     - https://github.com/cloudnative-pg/cloudnative-pg.git
     - https://cloudnative-pg.github.io/charts

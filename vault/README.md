@@ -33,7 +33,13 @@ about Vault is exposed to the internet.
    PROPAGATION_TIMEOUT=600
    TTL=120
    LOG_LEVEL=INFO
+   # Who may reach Vault and the dashboard: the k3s nodes plus the tailnet.
+   ALLOWED_SOURCES=<k3s-node-1>/32,<k3s-node-2>/32,100.64.0.0/10
    ```
+
+   `ALLOWED_SOURCES` is required: every router uses the `allowlist`
+   middleware, so anything outside it gets a 403. List the k3s node IPs (the
+   cluster reaches Vault over the LAN) and keep `100.64.0.0/10` for the tailnet.
 
 2. Provide the Cloudflare token (used by Traefik for the DNS-01 challenge):
 
@@ -68,13 +74,34 @@ just exec vault vault operator init
 just exec vault vault operator unseal <unseal-key>
 ```
 
-Privileged commands additionally need a token. Log in once — the token is
-written to `~/.vault-token` inside the container and persists for the life of
-the container, so subsequent commands pick it up automatically:
+Privileged commands additionally need a token. Use the root token **only**
+for the one-time setup below, then revoke it. `vault login` writes the token to
+`~/.vault-token` inside the container, where it would otherwise sit for the
+life of the container.
 
 ```bash
 just exec vault vault login <root-token>
+
+# Audit log: every request, secret paths HMAC'd. Writes to the container's
+# stdout, so `just logs vault` shows it.
+just exec vault vault audit enable file file_path=stdout
+
+# A day-to-day admin login instead of root.
+just exec vault sh -c 'vault policy write admin - <<EOF
+path "*" { capabilities = ["create", "read", "update", "delete", "list", "sudo"] }
+EOF'
+just exec vault vault auth enable userpass
+just exec vault vault write auth/userpass/users/<you> password=- policies=admin
+
+# Done with root: revoke it and drop the cached token.
+just exec vault vault token revoke -self
+just exec vault rm -f /root/.vault-token /home/vault/.vault-token
 ```
+
+From then on log in with `vault login -method=userpass username=<you>` from
+your workstation. If you ever need root again (e.g. a lost admin login),
+regenerate it from the unseal keys with `vault operator generate-root` and
+revoke it afterwards.
 
 Vault must be unsealed again after every container restart (unless you configure
 auto-unseal). From your workstation (on the LAN or tailnet) point the CLI at it
@@ -101,8 +128,9 @@ a newer version an older binary may refuse to start. Before upgrading, back up
 `vault/vault1/data/` and take a snapshot:
 
 ```bash
-just exec vault vault login <root-token>   # snapshot needs a privileged token
+just exec vault vault login -method=userpass username=<you>   # snapshot needs the admin policy
 just exec vault vault operator raft snapshot save /vault/data/pre-upgrade.snap
+just exec vault vault token revoke -self
 ```
 
 Then bump the tag, and:

@@ -119,7 +119,10 @@ Each namespace has its own `vso-auth` ServiceAccount and a `VaultAuth` that logs
 in against role `vso` with audience `vault`.
 
 The policy is templated: an identity can read only the KV path whose first
-segment matches its own namespace. Substitute the `kubernetes/` mount accessor
+segment matches its own namespace, in both mounts (`k3s-infra` for
+`apps/infra`, `k3s-services` for `apps/services`). Never widen it to
+`k3s-*/data/*`: the namespace segment is the only thing stopping one app from
+reading another app's secrets. Substitute the `kubernetes/` mount accessor
 from `vault auth list -format=json | jq -r '.["kubernetes/"].accessor'`:
 
 ```bash
@@ -130,11 +133,17 @@ path "k3s-infra/data/{{identity.entity.aliases.auth_kubernetes_aeecc09a.metadata
 path "k3s-infra/metadata/{{identity.entity.aliases.auth_kubernetes_aeecc09a.metadata.service_account_namespace}}/*" {
   capabilities = ["read", "list"]
 }
+path "k3s-services/data/{{identity.entity.aliases.auth_kubernetes_aeecc09a.metadata.service_account_namespace}}/*" {
+  capabilities = ["read"]
+}
+path "k3s-services/metadata/{{identity.entity.aliases.auth_kubernetes_aeecc09a.metadata.service_account_namespace}}/*" {
+  capabilities = ["read", "list"]
+}
 EOF
 
 vault write auth/kubernetes/role/vso \
     bound_service_account_names=vso-auth \
-    bound_service_account_namespaces=vault-secrets,traefik,cert-manager,authentik,argocd,grafana,monitoring,ntfy,loki,tempo,alloy \
+    bound_service_account_namespaces=vault-secrets,traefik,cert-manager,authentik,argocd,grafana,monitoring,ntfy,loki,tempo,alloy,wallos,pihole,bookorbit \
     audience=vault \
     policies=k3s-infra-read \
     ttl=1h
@@ -142,7 +151,10 @@ vault write auth/kubernetes/role/vso \
 
 Add every namespace that gets a `vso-auth` SA to
 `bound_service_account_namespaces`, and store its secrets under
-`k3s-infra/<namespace>/`.
+`k3s-infra/<namespace>/` or `k3s-services/<namespace>/`.
+
+Check the live state matches: `vault policy read k3s-infra-read` and
+`vault read auth/kubernetes/role/vso`.
 
 After this, the operator can reach Vault (`VaultConnection`), log in
 (`VaultAuth`), and you can start pulling secrets with `VaultStaticSecret` /
