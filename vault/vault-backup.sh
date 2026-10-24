@@ -38,29 +38,37 @@ backup() {
   token=$(
     wget -qO- \
       --post-data="{\"role_id\":\"$VAULT_BACKUP_ROLE_ID\",\"secret_id\":\"$VAULT_BACKUP_SECRET_ID\"}" \
-      "$VAULT_ADDR/v1/auth/approle/login" | jq .auth.client_token
-  )
+      "$VAULT_ADDR/v1/auth/approle/login" | jq -er .auth.client_token
+  ) || token=""
   if [ -z "$token" ]; then
     echo "$ERROR_LOG approle login failed" >&2
     return 1
   fi
 
   rm -f "$SNAPSHOT"
+  # Revoke the token as soon as the snapshot is out, whether or not it worked.
+  snapshot_ok=0
   wget -q --header="X-Vault-Token: $token" -O "$SNAPSHOT" \
-    "$VAULT_ADDR/v1/sys/storage/raft/snapshot"
+    "$VAULT_ADDR/v1/sys/storage/raft/snapshot" || snapshot_ok=1
+  wget -qO- --header="X-Vault-Token: $token" --post-data="" \
+    "$VAULT_ADDR/v1/auth/token/revoke-self" >/dev/null 2>&1 ||
+    log "$INFO_LOG token revoke failed, it expires on its own TTL"
+  [ "$snapshot_ok" -eq 0 ] || return 1
 
-  gzip -t "$SNAPSHOT"
+  # `set -e` is suspended inside `if backup`, so every step has to fail
+  # the function explicitly or a broken run is reported as ok.
+  gzip -t "$SNAPSHOT" || return 1
   log "$INFO_LOG snapshot ok, $(wc -c <"$SNAPSHOT") bytes"
 
-  restic cat config >/dev/null 2>&1 || restic init
+  restic cat config >/dev/null 2>&1 || restic init || return 1
 
-  restic backup "$SNAPSHOT" --host vault --tag vault
+  restic backup "$SNAPSHOT" --host vault --tag vault || return 1
   restic forget --host vault --tag vault \
     --keep-hourly 24 \
     --keep-daily 7 \
     --keep-weekly 4 \
     --keep-monthly 6 \
-    --prune
+    --prune || return 1
   restic snapshots --host vault --tag vault --latest 1
 }
 

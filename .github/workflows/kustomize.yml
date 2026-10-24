@@ -21,8 +21,12 @@ jobs:
           # renovate: datasource=github-releases depName=kubernetes-sigs/kustomize extractVersion=^kustomize/v(?<version>.+)$
           KUSTOMIZE_VERSION: 5.8.3
         run: |
-          curl -sSfL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz" \
-            | tar -xz -C /usr/local/bin kustomize
+          base="https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}"
+          tarball="kustomize_v${KUSTOMIZE_VERSION}_linux_amd64.tar.gz"
+          cd "$RUNNER_TEMP"
+          curl -sSfLO "$base/$tarball"
+          curl -sSfL "$base/checksums.txt" | grep " ${tarball}\$" | sha256sum -c -
+          tar -xzf "$tarball" -C /usr/local/bin kustomize
           kustomize version
 
       - name: Build every kustomization

@@ -1,12 +1,33 @@
 services:
+  # Traefik only needs to list containers and their labels. Giving it the raw
+  # socket (even :ro) means a Traefik compromise is root on this host, so it
+  # talks to this read-only API filter instead.
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy:v0.5.0
+    container_name: socket-proxy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      socket:
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+      - EVENTS=1
+      - POST=0
+
   traefik:
     image: traefik:v3.7.16
     container_name: traefik
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
+    depends_on:
+      - socket-proxy
     networks:
       proxy:
+      socket:
     ports:
       # HTTP → redirects to HTTPS (websecure)
       - "80:80"
@@ -14,7 +35,6 @@ services:
       # Reachable over the LAN and the tailnet (tailscaled runs on the host).
       - "443:443"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - acme:/etc/traefik/acme
       - traefik:/config
       - cloudflare:/cloudflare
@@ -35,6 +55,7 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=8.8.8.8:53"
       # Providers
       - "--providers.docker=true"
+      - "--providers.docker.endpoint=tcp://socket-proxy:2375"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=proxy"
       # API & Dashboard
@@ -54,6 +75,10 @@ services:
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.middlewares=allowlist"
+      # Only the cluster nodes and the tailnet may reach anything on this host.
+      # ALLOWED_SOURCES is a comma-separated CIDR list from .env.
+      - "traefik.http.middlewares.allowlist.ipallowlist.sourcerange=${ALLOWED_SOURCES}"
     secrets:
       - cf_token
     environment:
@@ -89,6 +114,7 @@ services:
       - "traefik.http.routers.vault.tls=true"
       # No wildcard — per-host cert for vault.${ROOT_DOMAIN} via DNS-01.
       - "traefik.http.routers.vault.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.vault.middlewares=allowlist@docker"
       - "traefik.http.services.vault.loadbalancer.server.port=8200"
 
   vault-backup:
@@ -118,6 +144,8 @@ services:
 
 networks:
   proxy:
+  socket:
+    internal: true
 
 volumes:
   acme:
