@@ -7,3 +7,4 @@ resources:
   - wallos.yaml
   - pihole.yaml
   - bookorbit.yaml
+  - opengym.yaml

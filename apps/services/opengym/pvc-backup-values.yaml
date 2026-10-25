@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pvc-backup-values
+data:
+  claimName: opengym-data
+  repository: s3:https://s3.nas.felixwallner.com/opengym-bucket/restic
+  vaultMount: k3s-services
+  vaultPath: opengym/backup
+  sqliteDatabases: ""
