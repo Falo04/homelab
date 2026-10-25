@@ -40,6 +40,14 @@
       "dependencyDashboardApproval": true
     },
     {
+      "description": "openGym's API and web images are one release",
+      "matchPackageNames": [
+        "ghcr.io/duartesantos8/opengym-api",
+        "ghcr.io/duartesantos8/opengym-web"
+      ],
+      "groupName": "opengym"
+    },
+    {
       "description": "Let new releases settle before proposing them",
       "matchUpdateTypes": ["major", "minor"],
       "minimumReleaseAge": "7 days"

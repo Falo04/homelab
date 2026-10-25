@@ -17,6 +17,8 @@ spec:
       namespace: pihole
     - server: https://kubernetes.default.svc
       namespace: bookorbit
+    - server: https://kubernetes.default.svc
+      namespace: opengym
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"

@@ -1,0 +1,59 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: opengym
+  namespace: argocd
+spec:
+  project: service-apps-project
+  sources:
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: apps/services/opengym
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/tailscale-node
+      helm:
+        releaseName: opengym-tailscale
+        valuesObject:
+          pod:
+            fullnameOverride: tailscale
+          tailscale:
+            hostname: opengym
+            tcpForward:
+              - port: 443
+                targetPort: 443
+                service: opengym-ingress
+              - port: 80
+                targetPort: 80
+                service: opengym-ingress
+          vault:
+            authRef: vault-k8s
+            mount: k3s-services
+            path: opengym/tailscale
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/service-ingress
+      helm:
+        releaseName: opengym-ingress
+        valuesObject:
+          pod:
+            fullnameOverride: opengym-ingress
+          host: gym.int.felixwallner.com
+          tlsSecret: opengym-tls
+          maxBodySize: 48m
+          backend:
+            service: opengym
+            port: 80
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: opengym
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
