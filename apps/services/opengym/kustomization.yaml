@@ -14,3 +14,17 @@ resources:
 
 components:
   - ../../../base/pvc-backup
+
+# opengym writes its data files 0600 as uid 1000, so the backup job (65534 by
+# default) must run as the same user to read them.
+patches:
+  - target:
+      kind: CronJob
+      name: pvc-backup
+    patch: |
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/securityContext/runAsUser
+        value: 1000
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/securityContext/runAsGroup
+        value: 1000
