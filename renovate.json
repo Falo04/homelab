@@ -8,6 +8,7 @@
   "prHourlyLimit": 0,
   "prConcurrentLimit": 0,
   "automerge": false,
+  "separateMajorMinor": false,
   "rebaseWhen": "behind-base-branch",
   "pre-commit": { "enabled": true },
   "argocd": {
@@ -36,6 +37,7 @@
     {
       "description": "Vault: no downgrades, step one minor at a time, manual approval",
       "matchDepNames": ["hashicorp/vault"],
+      "separateMajorMinor": true,
       "separateMultipleMinor": true,
       "dependencyDashboardApproval": true
     },
