@@ -1,0 +1,10 @@
+# Selects every pod in the namespace and allows nothing, so all ingress is
+# denied unless another policy in the namespace allows it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress

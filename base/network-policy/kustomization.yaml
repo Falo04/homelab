@@ -1,0 +1,26 @@
+# Namespace isolation: every pod accepts connections only from its own
+# namespace, plus the few sources every app needs (Prometheus scraping, the
+# CNPG operator). Any other source is an explicit allow in the receiving
+# namespace's network-policy.yaml -- the target declares who may call it,
+# never the caller.
+#
+# Usage, in the app's kustomization.yaml:
+#
+#   namespace: <app>
+#   resources:
+#     - network-policy.yaml   # only if the app has extra allowed sources
+#   components:
+#     - ../../../base/network-policy
+#
+# The policies carry no namespace of their own, so the kustomization must set
+# `namespace:`. Enforced by k3s's embedded kube-router; traffic from the node
+# itself (kubelet probes, API server -> webhooks) is not affected.
+---
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+resources:
+  - default-deny-ingress.yaml
+  - allow-same-namespace.yaml
+  - allow-monitoring.yaml
+  - allow-cnpg-operator.yaml

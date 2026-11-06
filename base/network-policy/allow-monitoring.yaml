@@ -1,0 +1,20 @@
+# Prometheus (namespace `monitoring`) may scrape metrics ports. Ports are
+# matched by container port name; charts use either `metrics` or
+# `http-metrics`. A target exposing metrics under another name needs its own
+# allow in the app's network-policy.yaml.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-monitoring
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - port: metrics
+        - port: http-metrics
