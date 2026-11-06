@@ -8,3 +8,7 @@ resources:
   - admin-secret.yaml
   - vault-auth.yaml
   - pihole-cert.yaml
+  - network-policy.yaml
+
+components:
+  - ../../../base/network-policy

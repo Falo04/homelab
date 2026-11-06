@@ -14,6 +14,7 @@ resources:
 
 components:
   - ../../../base/pvc-backup
+  - ../../../base/network-policy
 
 # opengym writes its data files 0600 as uid 1000, so the backup job (65534 by
 # default) must run as the same user to read them.

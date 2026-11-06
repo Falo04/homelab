@@ -18,3 +18,4 @@ resources:
 components:
   - ../../../base/cnpg-backup
   - ../../../base/pvc-backup
+  - ../../../base/network-policy

@@ -1,0 +1,27 @@
+# Allowed sources into this namespace beyond ../../../base/network-policy.
+#
+# DNS for the LAN through the MetalLB LoadBalancer. externalTrafficPolicy is
+# Local, so clients arrive with their own LAN address, not the node's.
+# kube-system is allowed in case CoreDNS forwards here via the node's resolver.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: pihole
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
