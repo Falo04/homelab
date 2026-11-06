@@ -1,7 +1,4 @@
 services:
-  # Traefik only needs to list containers and their labels. Giving it the raw
-  # socket (even :ro) means a Traefik compromise is root on this host, so it
-  # talks to this read-only API filter instead.
   socket-proxy:
     image: tecnativa/docker-socket-proxy:v0.5.0
     container_name: socket-proxy
@@ -17,6 +14,34 @@ services:
       - EVENTS=1
       - POST=0
 
+  tailscale:
+    image: tailscale/tailscale:v1.104.4
+    container_name: tailscale
+    hostname: vault
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      proxy:
+      socket:
+    ports:
+      - "80:80"
+      - "443:443"
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - tailscale:/var/lib/tailscale
+    secrets:
+      - ts_authkey
+    environment:
+      - TS_HOSTNAME=vault
+      - TS_AUTHKEY=file:/run/secrets/ts_authkey
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+      - TS_ACCEPT_DNS=false
+
   traefik:
     image: traefik:v3.7.17
     container_name: traefik
@@ -25,15 +50,8 @@ services:
       - no-new-privileges:true
     depends_on:
       - socket-proxy
-    networks:
-      proxy:
-      socket:
-    ports:
-      # HTTP → redirects to HTTPS (websecure)
-      - "80:80"
-      # websecure: the TLS entrypoint serving all internal services.
-      # Reachable over the LAN and the tailnet (tailscaled runs on the host).
-      - "443:443"
+      - tailscale
+    network_mode: service:tailscale
     volumes:
       - acme:/etc/traefik/acme
       - traefik:/config
@@ -58,27 +76,10 @@ services:
       - "--providers.docker.endpoint=tcp://socket-proxy:2375"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=proxy"
-      # API & Dashboard
-      - "--api.dashboard=true"
-      - "--api.insecure=false"
       # Observability
       - "--log.level=INFO"
       - "--accesslog=true"
       - "--metrics.prometheus=true"
-    # Traefik Dynamic configuration via Docker labels
-    labels:
-      # Enable self‑routing
-      - "traefik.enable=true"
-      # Dashboard router
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN}`)"
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.tls=true"
-      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.dashboard.middlewares=allowlist"
-      # Only the cluster nodes and the tailnet may reach anything on this host.
-      # ALLOWED_SOURCES is a comma-separated CIDR list from .env.
-      - "traefik.http.middlewares.allowlist.ipallowlist.sourcerange=${ALLOWED_SOURCES}"
     secrets:
       - cf_token
     environment:
@@ -116,6 +117,7 @@ services:
       - "traefik.http.routers.vault.tls.certresolver=letsencrypt"
       - "traefik.http.routers.vault.middlewares=allowlist@docker"
       - "traefik.http.services.vault.loadbalancer.server.port=8200"
+      - "traefik.http.middlewares.allowlist.ipallowlist.sourcerange=${ALLOWED_SOURCES}"
 
   vault-backup:
     image: restic/restic:0.19.1
@@ -151,8 +153,11 @@ volumes:
   acme:
   traefik:
   cloudflare:
+  tailscale:
   vault_backup_cache:
 
 secrets:
   cf_token:
     file: cloudflare-token.txt
+  ts_authkey:
+    file: tailscale-authkey.txt
