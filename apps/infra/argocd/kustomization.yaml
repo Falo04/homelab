@@ -9,3 +9,7 @@ resources:
   - oidc-secret.yaml
   - argocd-cert.yaml
   - argocd-ingress.yaml
+  - network-policy.yaml
+
+components:
+  - ../../../base/network-policy

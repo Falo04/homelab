@@ -10,6 +10,10 @@ resources:
   - postgres.yaml
   - grafana-cert.yaml
   - grafana-ingress.yaml
+  - network-policy.yaml
+
+components:
+  - ../../../base/network-policy
 
 configMapGenerator:
   - name: grafana-dashboard-k8s

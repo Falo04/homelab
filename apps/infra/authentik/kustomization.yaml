@@ -11,6 +11,8 @@ resources:
   - authentik-cert.yaml
   - authentik-ingress.yaml
   - backup-values.yaml
+  - network-policy.yaml
 
 components:
   - ../../../base/cnpg-backup
+  - ../../../base/network-policy

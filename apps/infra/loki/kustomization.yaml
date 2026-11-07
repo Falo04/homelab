@@ -5,3 +5,7 @@ resources:
   - namespace.yaml
   - vault-auth.yaml
   - s3-secret.yaml
+  - network-policy.yaml
+
+components:
+  - ../../../base/network-policy

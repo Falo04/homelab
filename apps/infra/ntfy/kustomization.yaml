@@ -13,9 +13,11 @@ resources:
   - servicemonitor.yaml
   - ntfy-cert.yaml
   - ntfy-ingress.yaml
+  - network-policy.yaml
 
 components:
   - ../../../base/cnpg-backup
+  - ../../../base/network-policy
 
 configMapGenerator:
   - name: ntfy-config

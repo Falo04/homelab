@@ -13,7 +13,8 @@
 #     - ../../../base/network-policy
 #
 # The policies carry no namespace of their own, so the kustomization must set
-# `namespace:`. Enforced by k3s's embedded kube-router; traffic from the node
+# `namespace:`. Selectors and ports refer to the target pod's labels and
+# container ports, not its Service's (`kubectl get pod -o yaml`). Enforced by k3s's embedded kube-router; traffic from the node
 # itself (kubelet probes, API server -> webhooks) is not affected.
 ---
 apiVersion: kustomize.config.k8s.io/v1alpha1
