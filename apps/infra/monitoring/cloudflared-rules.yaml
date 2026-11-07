@@ -1,0 +1,26 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cloudflared-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: cloudflared
+spec:
+  groups:
+    - name: cloudflared.rules
+      rules:
+        # No replica holds a connection to the Cloudflare edge, so every
+        # Public hostname is down.
+        - alert: CloudflaredTunnelDown
+          annotations:
+            summary: Cloudflare tunnel has no edge connections
+            description: >-
+              No cloudflared replica has a connection to the Cloudflare edge,
+              so every public hostname is unreachable. Check the cloudflared
+              logs, the tunnel token in Vault, and egress on 7844.
+          expr: |-
+            sum(cloudflared_tunnel_ha_connections) < 1
+              or absent(cloudflared_tunnel_ha_connections)
+          for: 5m
+          labels:
+            severity: critical

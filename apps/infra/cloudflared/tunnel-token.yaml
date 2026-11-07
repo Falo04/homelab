@@ -1,0 +1,19 @@
+# Token for the Cloudflare tunnel.
+# Key: `token`
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: vault-tunnel-token
+  namespace: cloudflared
+spec:
+  vaultAuthRef: vault-k8s
+  mount: k3s-infra
+  type: kv-v2
+  path: cloudflared/tunnel-token
+  refreshAfter: 1h
+  destination:
+    create: true
+    name: tunnel-token
+    labels:
+      app.kubernetes.io/part-of: cloudflared

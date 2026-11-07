@@ -8,6 +8,7 @@ resources:
   - cnpg-rules.yaml
   - cnpg-backup-rules.yaml
   - pvc-backup-rules.yaml
+  - cloudflared-rules.yaml
   - network-policy.yaml
 
 components:
