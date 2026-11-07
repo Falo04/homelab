@@ -8,8 +8,6 @@ resources:
   - vault-auth.yaml
   - secret-key.yaml
   - postgres.yaml
-  - authentik-cert.yaml
-  - authentik-ingress.yaml
   - backup-values.yaml
   - network-policy.yaml
 

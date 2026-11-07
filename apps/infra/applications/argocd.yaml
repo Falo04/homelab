@@ -33,7 +33,7 @@ spec:
               admin.enabled: false
               oidc.config: |
                 name: authentik
-                issuer: https://sso.int.felixwallner.com/application/o/argocd/
+                issuer: https://sso.felixwallner.com/application/o/argocd/
                 clientID: $argocd-oidc:clientID
                 clientSecret: $argocd-oidc:clientSecret
                 requestedScopes:
@@ -41,7 +41,7 @@ spec:
                   - profile
                   - email
                   - groups
-                logoutURL: https://sso.int.felixwallner.com/application/o/argocd/end-session/
+                logoutURL: https://sso.felixwallner.com/application/o/argocd/end-session/
             rbac:
               policy.default: ""
               scopes: "[groups]"
