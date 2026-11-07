@@ -23,6 +23,18 @@ spec:
         - port: 53
           protocol: TCP
 
+    # Public app: sso.felixwallner.com
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: authentik
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: authentik
+              app.kubernetes.io/component: server
+      ports:
+        - port: http
+
     # Cloudflare edge
     - to:
         - ipBlock:
