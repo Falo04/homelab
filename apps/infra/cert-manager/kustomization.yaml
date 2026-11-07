@@ -4,3 +4,6 @@ kind: Kustomization
 resources:
   - cluster-issuer.yaml
   - cloudflare.yaml
+
+components:
+  - ../../../base/network-policy

@@ -19,6 +19,10 @@ spec:
       chart: plugin-barman-cloud
       targetRevision: 0.8.1
 
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: apps/infra/cloudnativepg
+
   destination:
     namespace: cnpg-system
     server: https://kubernetes.default.svc
