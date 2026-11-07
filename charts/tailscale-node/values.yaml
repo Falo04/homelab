@@ -3,7 +3,7 @@ image:
   # Image repository.
   repository: ghcr.io/tailscale/tailscale
   # Image tag (Tailscale version).
-  tag: v1.98.10
+  tag: v1.104.4
   # Pull policy for the image.
   pullPolicy: IfNotPresent
 
