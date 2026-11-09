@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: trek
+
+resources:
+  - namespace.yaml
+  - vault-auth.yaml
+  - app-secret.yaml
+  - pvc-backup-values.yaml
+  - pvc.yaml
+  - trek-cert.yaml
+
+components:
+  - ../../../base/pvc-backup
+  - ../../../base/network-policy
+
+# trek-uploads is backed up by ./uploads-backup, its own Argo source.
+patches:
+  - target:
+      kind: CronJob
+    patch: |
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/securityContext/runAsUser
+        value: 1000
+      - op: replace
+        path: /spec/jobTemplate/spec/template/spec/securityContext/runAsGroup
+        value: 1000

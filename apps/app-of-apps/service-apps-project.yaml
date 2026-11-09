@@ -8,6 +8,7 @@ spec:
   sourceRepos:
     - https://github.com/Falo04/homelab.git
     - https://mojo2600.github.io/pihole-kubernetes/
+    - https://chart.liketrek.com
   destinations:
     - server: https://kubernetes.default.svc
       namespace: argocd
@@ -19,6 +20,8 @@ spec:
       namespace: bookorbit
     - server: https://kubernetes.default.svc
       namespace: opengym
+    - server: https://kubernetes.default.svc
+      namespace: trek
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"

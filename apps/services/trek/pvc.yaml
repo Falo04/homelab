@@ -1,0 +1,25 @@
+# The chart mounts data (SQLite database, key files) and uploads as two
+# separate volumes with no subPath, so they need two claims.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: trek-data
+  namespace: trek
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: trek-uploads
+  namespace: trek
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
