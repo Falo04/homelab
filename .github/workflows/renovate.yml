@@ -4,7 +4,7 @@ on:
     - cron: "0 4 * * *"
   workflow_dispatch:
   issues:
-    types: [ edited ]
+    types: [edited]
 
 concurrency:
   group: renovate
@@ -29,6 +29,12 @@ jobs:
         with:
           client-id: ${{ secrets.RENOVATE_CLIENT_ID }}
           private-key: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-issues: write
+          permission-workflows: write
+          permission-statuses: write
+          permission-checks: read
 
       - uses: renovatebot/github-action@1c0cf989c02653fba0efe7ca5772338860ca71dc # v46.3.12
         with:
