@@ -27,12 +27,13 @@ spec:
 
           env:
             TZ: "Europe/Berlin"
-            APP_URL: "https://trek.int.felixwallner.com"
-            ALLOWED_ORIGINS: "https://trek.int.felixwallner.com"
+            APP_URL: "https://trek.felixwallner.com"
+            ALLOWED_ORIGINS: "https://trek.felixwallner.com"
             TRUST_PROXY: "1"
             FORCE_HTTPS: "true"
             OIDC_DISPLAY_NAME: "authentik"
             OIDC_ONLY: "true"
+            TREK_PLUGINS_ENABLED: "false"
 
           existingSecret: trek-app
           extraEnvFrom:
@@ -51,43 +52,6 @@ spec:
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
       path: apps/services/trek/uploads-backup
-
-    - repoURL: https://github.com/Falo04/homelab.git
-      targetRevision: main
-      path: charts/tailscale-node
-      helm:
-        releaseName: trek-tailscale
-        valuesObject:
-          pod:
-            fullnameOverride: tailscale
-          tailscale:
-            hostname: trek
-            tcpForward:
-              - port: 443
-                targetPort: 443
-                service: trek-ingress
-              - port: 80
-                targetPort: 80
-                service: trek-ingress
-          vault:
-            authRef: vault-k8s
-            mount: k3s-services
-            path: trek/tailscale
-
-    - repoURL: https://github.com/Falo04/homelab.git
-      targetRevision: main
-      path: charts/service-ingress
-      helm:
-        releaseName: trek-ingress
-        valuesObject:
-          pod:
-            fullnameOverride: trek-ingress
-          host: trek.int.felixwallner.com
-          tlsSecret: trek-tls
-          maxBodySize: 64m
-          backend:
-            service: trek
-            port: 3000
 
   destination:
     server: https://kubernetes.default.svc

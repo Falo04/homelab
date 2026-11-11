@@ -35,6 +35,17 @@ spec:
       ports:
         - port: http
 
+    # Public app: trek.felixwallner.com
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: trek
+          podSelector:
+            matchLabels:
+              app: trek
+      ports:
+        - port: http
+
     # Cloudflare edge
     - to:
         - ipBlock:

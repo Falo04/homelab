@@ -9,7 +9,7 @@ resources:
   - app-secret.yaml
   - pvc-backup-values.yaml
   - pvc.yaml
-  - trek-cert.yaml
+  - network-policy.yaml
 
 components:
   - ../../../base/pvc-backup
