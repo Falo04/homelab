@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: https://chart.liketrek.com
       chart: trek
-      targetRevision: 5.1.2
+      targetRevision: 5.1.4
       helm:
         releaseName: trek
         valuesObject:
