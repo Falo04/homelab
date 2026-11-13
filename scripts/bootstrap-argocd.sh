@@ -5,7 +5,7 @@ set -euo pipefail
 # Only has to be close to the version pinned in
 # apps/infra/applications/argocd.yaml; Argo CD reconciles itself to whatever
 # that Application says on the first sync.
-CHART_VERSION="10.14.0"
+CHART_VERSION="10.18.0"
 NAMESPACE="argocd"
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
