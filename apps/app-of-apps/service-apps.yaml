@@ -4,7 +4,7 @@ metadata:
   name: service-apps
   namespace: argocd
 spec:
-  project: service-apps-project
+  project: default
   source:
     repoURL: https://github.com/Falo04/homelab.git
     targetRevision: main

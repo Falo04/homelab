@@ -4,7 +4,7 @@ metadata:
   name: infra-apps
   namespace: argocd
 spec:
-  project: infra-apps-project
+  project: default
   source:
     repoURL: https://github.com/Falo04/homelab.git
     targetRevision: main
