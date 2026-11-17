@@ -62,9 +62,6 @@ spec:
               expose:
                 default: false
 
-          service:
-            type: ClusterIP
-
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
       path: apps/infra/traefik
