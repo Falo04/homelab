@@ -47,6 +47,8 @@ spec:
               value: "true"
             - name: TS_SERVE_CONFIG
               value: /etc/ts-serve/serve
+            - name: TS_EXTRA_ARGS
+              value: "--login-server=sdn.felixwallner.com"
             - name: TS_AUTHKEY
               valueFrom:
                 secretKeyRef:
