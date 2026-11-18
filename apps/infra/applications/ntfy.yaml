@@ -5,10 +5,47 @@ metadata:
   namespace: argocd
 spec:
   project: infra-apps-project
-  source:
-    repoURL: https://github.com/Falo04/homelab.git
-    targetRevision: main
-    path: apps/infra/ntfy
+  sources:
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: apps/infra/ntfy
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/tailscale-node
+      helm:
+        releaseName: ntfy-tailscale
+        valuesObject:
+          pod:
+            fullnameOverride: tailscale
+          tailscale:
+            hostname: ntfy
+            tcpForward:
+              - port: 443
+                targetPort: 443
+                service: ntfy-ingress
+              - port: 80
+                targetPort: 80
+                service: ntfy-ingress
+          vault:
+            authRef: vault-k8s
+            mount: k3s-infra
+            path: ntfy/tailscale
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/service-ingress
+      helm:
+        releaseName: ntfy-ingress
+        valuesObject:
+          pod:
+            fullnameOverride: ntfy-ingress
+          host: ntfy.int.felixwallner.com
+          tlsSecret: ntfy-tls
+          backend:
+            service: ntfy
+            port: 80
+
   destination:
     server: https://kubernetes.default.svc
     namespace: ntfy

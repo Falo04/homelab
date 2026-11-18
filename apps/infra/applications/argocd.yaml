@@ -52,6 +52,43 @@ spec:
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
       path: apps/infra/argocd
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/tailscale-node
+      helm:
+        releaseName: argocd-tailscale
+        valuesObject:
+          pod:
+            fullnameOverride: tailscale
+          tailscale:
+            hostname: argocd
+            tcpForward:
+              - port: 443
+                targetPort: 443
+                service: argocd-ingress
+              - port: 80
+                targetPort: 80
+                service: argocd-ingress
+          vault:
+            authRef: vault-k8s
+            mount: k3s-infra
+            path: argocd/tailscale
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/service-ingress
+      helm:
+        releaseName: argocd-ingress
+        valuesObject:
+          pod:
+            fullnameOverride: argocd-ingress
+          host: argocd.int.felixwallner.com
+          tlsSecret: argocd-tls
+          backend:
+            service: argocd-server
+            port: 80
+
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
