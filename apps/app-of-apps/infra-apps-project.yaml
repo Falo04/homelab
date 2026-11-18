@@ -9,7 +9,6 @@ spec:
     - https://github.com/Falo04/homelab.git
     - https://argoproj.github.io/argo-helm
     - https://helm.releases.hashicorp.com
-    - https://traefik.github.io/charts
     - https://charts.jetstack.io
     - https://charts.goauthentik.io
     - https://github.com/cloudnative-pg/cloudnative-pg.git
@@ -24,8 +23,6 @@ spec:
       namespace: cert-manager
     - server: https://kubernetes.default.svc
       namespace: cloudflared
-    - server: https://kubernetes.default.svc
-      namespace: traefik
     - server: https://kubernetes.default.svc
       namespace: kube-system
     - server: https://kubernetes.default.svc

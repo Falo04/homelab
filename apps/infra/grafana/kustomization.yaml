@@ -9,8 +9,6 @@ resources:
   - ntfy-secret.yaml
   - postgres.yaml
   - grafana-cert.yaml
-  - grafana-ingress.yaml
-  - network-policy.yaml
 
 components:
   - ../../../base/network-policy

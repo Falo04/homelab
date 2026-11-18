@@ -12,7 +12,6 @@ resources:
   - deployment.yaml
   - servicemonitor.yaml
   - ntfy-cert.yaml
-  - ntfy-ingress.yaml
   - network-policy.yaml
 
 components:

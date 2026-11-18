@@ -15,6 +15,5 @@ resources:
   - loki.yaml
   - ntfy.yaml
   - tempo.yaml
-  - traefik.yaml
   - vault-secrets-operator.yaml
   - vault-secrets.yaml
