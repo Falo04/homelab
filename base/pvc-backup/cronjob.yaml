@@ -89,7 +89,7 @@ spec:
                   memory: 256Mi
           containers:
             - name: restic
-              image: restic/restic:0.19.1
+              image: restic/restic:0.20.0
               securityContext:
                 allowPrivilegeEscalation: false
                 readOnlyRootFilesystem: true
