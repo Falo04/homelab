@@ -8,3 +8,4 @@ resources:
   - bookorbit.yaml
   - opengym.yaml
   - trek.yaml
+  - livesync.yaml

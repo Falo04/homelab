@@ -1,0 +1,60 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: livesync
+  namespace: argocd
+spec:
+  project: service-apps-project
+  sources:
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: apps/services/livesync
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/tailscale-node
+      helm:
+        releaseName: livesync-tailscale
+        valuesObject:
+          pod:
+            fullnameOverride: tailscale
+          tailscale:
+            hostname: livesync
+            tcpForward:
+              - port: 443
+                targetPort: 443
+                service: livesync-ingress
+              - port: 80
+                targetPort: 80
+                service: livesync-ingress
+          vault:
+            authRef: vault-k8s
+            mount: k3s-services
+            path: livesync/tailscale
+
+    - repoURL: https://github.com/Falo04/homelab.git
+      targetRevision: main
+      path: charts/service-ingress
+      helm:
+        releaseName: livesync-ingress
+        valuesObject:
+          pod:
+            fullnameOverride: livesync-ingress
+          host: livesync.int.felixwallner.com
+          tlsSecret: livesync-tls
+          # Attachments sync as chunked documents, but keep headroom for large ones.
+          maxBodySize: 64m
+          backend:
+            service: livesync
+            port: 80
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: livesync
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

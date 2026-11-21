@@ -17,6 +17,8 @@ spec:
       namespace: opengym
     - server: https://kubernetes.default.svc
       namespace: trek
+    - server: https://kubernetes.default.svc
+      namespace: livesync
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace

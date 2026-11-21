@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: livesync
+  namespace: livesync
+  labels:
+    app.kubernetes.io/name: livesync
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  # The data volume is ReadWriteOnce, so the old pod has to go before the new
+  # one can mount it.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: livesync
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: livesync
+    spec:
+      automountServiceAccountToken: false
+      # Run as the image's couchdb user from the start; the entrypoint then
+      # skips its chown/setpriv step, which would need root.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 5984
+        runAsGroup: 5984
+        fsGroup: 5984
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: couchdb
+          image: couchdb:3.5.3
+          ports:
+            - name: http
+              containerPort: 5984
+          envFrom:
+            - secretRef:
+                name: livesync-auth
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: data
+              mountPath: /opt/couchdb/data
+            - name: config
+              mountPath: /opt/couchdb/etc/default.d/50-livesync.ini
+              subPath: local.ini
+              readOnly: true
+          # require_valid_user also covers /_up, so an HTTP probe would need
+          # credentials; a TCP check is enough here.
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: livesync-data
+        - name: config
+          configMap:
+            name: livesync-config
