@@ -5,8 +5,10 @@ namespace: bookorbit
 
 resources:
   - namespace.yaml
-  - vault-auth.yaml
-  - app-secret.yaml
+  - app-secret.sops.yaml
+  - tailscale-secret.sops.yaml
+  - pvc-backup-secret.sops.yaml
+  - cnpg-backup-secret.sops.yaml
   - backup-values.yaml
   - pvc-backup-values.yaml
   - postgres.yaml
@@ -19,3 +21,21 @@ components:
   - ../../../base/cnpg-backup
   - ../../../base/pvc-backup
   - ../../../base/network-policy
+
+patches:
+  # The pvc-backup component still brings a VaultStaticSecret for the apps that
+  # haven't moved off Vault yet. Here pvc-backup-s3 comes from
+  # pvc-backup-secret.sops.yaml instead.
+  - patch: |-
+      $patch: delete
+      apiVersion: secrets.hashicorp.com/v1beta1
+      kind: VaultStaticSecret
+      metadata:
+        name: vault-pvc-backup
+  # Same for cnpg-backup: cnpg-backup-s3 comes from cnpg-backup-secret.sops.yaml.
+  - patch: |-
+      $patch: delete
+      apiVersion: secrets.hashicorp.com/v1beta1
+      kind: VaultStaticSecret
+      metadata:
+        name: vault-cnpg-backup

@@ -5,8 +5,8 @@ namespace: trek
 
 resources:
   - namespace.yaml
-  - vault-auth.yaml
-  - app-secret.yaml
+  - app-secret.sops.yaml
+  - pvc-backup-secret.sops.yaml
   - pvc-backup-values.yaml
   - pvc.yaml
   - network-policy.yaml
@@ -17,6 +17,15 @@ components:
 
 # trek-uploads is backed up by ./uploads-backup, its own Argo source.
 patches:
+  # The pvc-backup component still brings a VaultStaticSecret for the apps that
+  # haven't moved off Vault yet. Here pvc-backup-s3 comes from
+  # pvc-backup-secret.sops.yaml instead.
+  - patch: |-
+      $patch: delete
+      apiVersion: secrets.hashicorp.com/v1beta1
+      kind: VaultStaticSecret
+      metadata:
+        name: vault-pvc-backup
   - target:
       kind: CronJob
     patch: |
