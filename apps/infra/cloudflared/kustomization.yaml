@@ -5,8 +5,7 @@ namespace: cloudflared
 
 resources:
   - namespace.yaml
-  - vault-auth.yaml
-  - tunnel-token.yaml
+  - tunnel-token.sops.yaml
   - deployment.yaml
   - podmonitor.yaml
   - network-policy.yaml

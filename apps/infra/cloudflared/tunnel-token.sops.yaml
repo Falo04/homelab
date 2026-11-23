@@ -1,0 +1,50 @@
+# Token for the Cloudflare tunnel.
+# key: `token`
+apiVersion: isindir.github.com/v1alpha3
+kind: SopsSecret
+metadata:
+    name: tunnel-token
+spec:
+    secretTemplates:
+        - name: tunnel-token
+          labels:
+            app.kubernetes.io/part-of: cloudflared
+          stringData:
+            token: ENC[AES256_GCM,data:MYKZHkZ9mcT/HX2iQds55SD54RCivHv4CmPKMiVOOgGXv6gMOYb6FN7h2f9EY0ZBA5jOLRSR4XUiI63W4S6MwEMIscOzSm2P0o/vyL/hePn31UhEF/INQIIUk8yVk7ba66PyVlF4xBj8WFb5ZWVkfNClh1wlKdNNo1yrGKhgwjoZzmCMbWf79Y6b+V7J/6Gwbkl0RSYptXrCc/1ofrfdyRIH65VZIbqKEUJXcpGZGnwxZGZXTRb8Ww==,iv:ZMPnp9SIgn3sovzQ84YdQ8hlUGzQO0XZWD7Rf9Lm8aU=,tag:aHzDFpKu+KGQmCFYRvZaQg==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBOVU1IaDVwN2twbFVUb0xr
+            cVRkc0txeUtoQ1BIakJxTE5oSU1xcHdQRWtRClRmUVdZUkd1OEhDeUl2ejY0aVlu
+            UXNGTUtyeUpyVThGaDFmekhRZ2FZQmMKLS0tIC9JVmdVbHJBcHY5andraktqYkx0
+            Q1VubEIvYjhicUNXWndLRVJPRExieVkKPpI16b8e6CV5WsNOJxaDe4S3HvkBfpwE
+            fqWISXYewu+dEu3vVHC9k2kUe0oUIXi5QCbdm9YF79NBikwViuNyHg==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1p4mglv45a3tg8nh7cfrpfyut2adf3mmjaarw8lgn6fhd2q5wf3wqecfnjh
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-23T19:06:41Z"
+    mac: ENC[AES256_GCM,data:cEgjsEs7hST9b4TU72XOMiLzKZ80j167oqcnfK1CuWrMGwt24co4r/KZH2yVrKK5Va8x7lmR/N+HAwqTBtTCXytDJ99qPonkJPhOZDYjDvzZgcYe7MgYwtpDQPL2CaX8wt+QT2hN69Nc8h6ZUHwLJRq5HKSKh5otMUt0leKset8=,iv:zB0EXAIwkGE+Ur8lJV6kAiUFTiGUitbQPGa2flW0InE=,tag:n1k7wfZIHMsz+32fYTeMVg==,type:str]
+    mac_only_encrypted: true
+    pgp:
+        - created_at: "2026-11-23T19:06:41Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMAwAAAAAAAAAAAQ/+KfXFq6FyuEmUEmF9YqDA5ELQAJkpnGGZrzilh27nAMLT
+            earpd6KwZoE8Ka9QBUX4C5L5md4JDVlT6rTONH+d+VX4xoP9AqcZHFb1bjtdrh3m
+            krKR5oohlIF0awQxNN25t8Mnjb4MaVLrgSQdV1JE+tWnzdSVo4OyE6r/3bwv+K7P
+            G6oW3bTJlCfvKoPQcnyiRI+lnHShqSPbMGKGtpglchl1s4AHse8AynJkYdyNmSO/
+            phaVmXvsgqkj8JIk3XOfH7ldskzWOpSApa7MMeYfxyu92qb1HI0efQgLPh8H7rzd
+            viDcs1S7DBpg9L7TWyOGCfnVfuKdoVrUo1KGIHKGGl9DJkj70TwF57zX4YFllcxi
+            EwujO2+8iBvwc+a86E2k42BxW0e8qI9j0QjKr30W5qsIbsSIw46UucsBJ4ra2Dxq
+            2G7Sva4bKZp2idrRpvF+0P12Se1Zz3vJ8ASY4F/fERKVrKnbEtOOBd9Cph9AXMq3
+            nFeiCKtrabSYa+GjCLCGUPfTSwlnU95Zfo50eoLySiUf2YFSyhYH2N7zvrJy8ILP
+            IMxvR8gRk5i9KgoSbaxDY63CsnvSVz8PaiDH/UgC/32HbDJ/MmwUbk5O1fw/Aje9
+            hXmIjjis2/PKcuqNnH6YDaW2ykX6VDzPZQWGUZfeWeVyn934ajP5OJxAy5vgF6fS
+            XgHpWgfFJGix9r0E97MU/qHLweps+b/4wHRFAf+xL82ungsrOK5hCrRpJuEy7aOL
+            L4Py563TDAv3XLmbLJRTjm4ZuebFOE3p9hkQL+qBRTl9p7/BAub/M5DEhGOgans=
+            =JlSI
+            -----END PGP MESSAGE-----
+          fp: 5C2BBDB8C7D402C02F2A1FD426845014B07C525D
+    version: 3.13.3

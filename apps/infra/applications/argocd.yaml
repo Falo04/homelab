@@ -70,10 +70,7 @@ spec:
               - port: 80
                 targetPort: 80
                 service: argocd-ingress
-          vault:
-            authRef: vault-k8s
-            mount: k3s-infra
-            path: argocd/tailscale
+          authSecret: tailscale-auth
 
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
