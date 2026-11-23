@@ -16,22 +16,8 @@ pod:
   fullnameOverride: ""
 
 # Name of an existing Secret in the release namespace with a `TS_AUTHKEY`
-# field, e.g. one made by a SopsSecret next to the app. When set, the `vault`
-# block below is ignored and no VaultStaticSecret is rendered.
+# field, e.g. one made by a SopsSecret next to the app. Required.
 authSecret: ""
-
-# The tailnet auth key is synced from Vault by the Vault Secrets Operator. This
-# chart only creates the VaultStaticSecret; the VaultAuth it references and must
-# already exist. Only used while `authSecret` is empty.
-vault:
-  # Name of an existing VaultAuth in the release namespace to authenticate with.
-  authRef: ""
-  # KV-v2 secrets-engine mount that holds the auth key (e.g. "k3s-infra").
-  mount: ""
-  # Path within the KV mount to a secret containing a `TS_AUTHKEY` field.
-  path: ""
-  # How often the operator re-reads the key from Vault.
-  refreshAfter: 1h
 
 tailscale:
   # Tailnet hostname for this node (TS_HOSTNAME).

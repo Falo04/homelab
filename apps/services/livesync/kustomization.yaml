@@ -18,17 +18,6 @@ components:
   - ../../../base/pvc-backup
   - ../../../base/network-policy
 
-patches:
-  # The pvc-backup component still brings a VaultStaticSecret for the apps that
-  # haven't moved off Vault yet. Here pvc-backup-s3 comes from
-  # pvc-backup-secret.sops.yaml instead.
-  - patch: |-
-      $patch: delete
-      apiVersion: secrets.hashicorp.com/v1beta1
-      kind: VaultStaticSecret
-      metadata:
-        name: vault-pvc-backup
-
 configMapGenerator:
   - name: livesync-config
     namespace: livesync

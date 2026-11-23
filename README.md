@@ -2,9 +2,8 @@
 
 My [k3s](https://k3s.io/) homelab cluster, managed with GitOps via
 [Argo CD](https://argo-cd.readthedocs.io/). Cluster state lives in this repo:
-Argo CD watches it and reconciles the cluster to match. Secrets are kept in
-[HashiCorp Vault](/vault/README.md), run alongside the cluster and reachable
-only over the local network and Tailscale.
+Argo CD watches it and reconciles the cluster to match. Secrets live in the
+repo too, encrypted with [SOPS](https://github.com/getsops/sops).
 
 > Work in progress — this cluster is still being built out.
 
@@ -15,7 +14,6 @@ only over the local network and Tailscale.
 | `bootstrap/`      | The [app-of-apps](bootstrap/app-of-apps.yaml) Application that seeds Argo CD |
 | `apps/`           | Argo CD `Application` definitions and their manifests                |
 | `scripts/`        | One-off host scripts, notably the [Argo CD bootstrap](scripts/bootstrap-argocd.sh) |
-| `vault/`          | HashiCorp Vault behind Traefik, LAN + Tailscale only ([README](/vault/README.md)) |
 
 ## How it works
 
@@ -37,7 +35,8 @@ cluster automatically, its own release included.
 
 ## Secrets
 
-Secrets are managed by HashiCorp Vault, deployed separately with Docker Compose
-and fronted by Traefik (TLS via Let's Encrypt DNS-01). It is reachable only over
-the local network and the tailnet — never the public internet. See
-[`vault/README.md`](/vault/README.md) for setup, initialization, and upgrades.
+Every secret is a `*.sops.yaml` next to the app that uses it: a `SopsSecret`
+whose values are encrypted with SOPS, to an age key the cluster holds and a GPG
+key on a YubiKey. [sops-secrets-operator](https://github.com/isindir/sops-secrets-operator)
+decrypts them in the cluster into normal `Secret`s. See
+[`docs/secrets.md`](docs/secrets.md) for editing, adding and rotating them.

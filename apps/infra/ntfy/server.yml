@@ -8,12 +8,11 @@ auth-default-access: "deny-all"
 enable-login: true
 enable-signup: false
 
-# Topic ACLs. Users themselves are provisioned from Vault (NTFY_AUTH_USERS).
+# Topic ACLs. Users themselves come from auth-secret.sops.yaml (NTFY_AUTH_USERS).
 auth-access:
   - "alertmanager:homelab-alerts:wo"
   - "grafana:homelab-alerts:wo"
   - "wallos:wallos:wo"
-  - "vault-backup:homelab-alerts:wo"
 
 # Keep missed notifications around for phones that were offline for a while.
 cache-duration: "72h"

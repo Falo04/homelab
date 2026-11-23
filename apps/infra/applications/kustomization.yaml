@@ -17,4 +17,3 @@ resources:
   - ntfy.yaml
   - tempo.yaml
   - vault-secrets-operator.yaml
-  - vault-secrets.yaml

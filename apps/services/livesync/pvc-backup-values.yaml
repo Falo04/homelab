@@ -5,6 +5,4 @@ metadata:
 data:
   claimName: livesync-data
   repository: s3:https://s3.nas.felixwallner.com/livesync-bucket/restic
-  vaultMount: k3s-services
-  vaultPath: livesync/backup
   sqliteDatabases: ""

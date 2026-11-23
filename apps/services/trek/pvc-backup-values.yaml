@@ -5,6 +5,4 @@ metadata:
 data:
   claimName: trek-data
   repository: s3:https://s3.nas.felixwallner.com/trek-bucket/restic
-  vaultMount: k3s-services
-  vaultPath: trek/backup
   sqliteDatabases: "travel.db"

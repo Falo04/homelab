@@ -44,13 +44,6 @@
       "groupName": "argo-cd"
     },
     {
-      "description": "Vault: no downgrades, step one minor at a time, manual approval",
-      "matchDepNames": ["hashicorp/vault"],
-      "separateMajorMinor": true,
-      "separateMultipleMinor": true,
-      "dependencyDashboardApproval": true
-    },
-    {
       "description": "sops-secrets-operator holds the cluster key: chart and image together, manual approval",
       "matchDepNames": ["sops-secrets-operator", "quay.io/isindir/sops-secrets-operator"],
       "groupName": "sops-secrets-operator",

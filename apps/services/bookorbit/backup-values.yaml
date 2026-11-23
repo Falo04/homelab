@@ -5,5 +5,3 @@ metadata:
 data:
   clusterName: bookorbit-postgres
   destinationPath: s3://bookorbit-bucket/
-  vaultMount: k3s-services
-  vaultPath: bookorbit/backup

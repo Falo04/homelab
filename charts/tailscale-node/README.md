@@ -2,14 +2,14 @@
 
 A Helm chart for a single **userspace Tailscale node** that fronts an in-cluster
 Service on your tailnet. Each release is one tailnet node with its own hostname,
-its own auth key (from an existing Secret, or pulled from Vault), and its own set of TCP forwards.
+its own auth key, and its own set of TCP forwards.
 
 ## How it works
 
 The tailscaled container runs in **userspace mode** and reads a
 [serve config](https://tailscale.com/kb/1242/tailscale-serve) that TCP-forwards
-tailnet ports to a cluster Service. Its auth key comes from Vault via the Vault
-Secrets Operator, and its node state is persisted in a Kubernetes Secret so the
+tailnet ports to a cluster Service. Its auth key comes from an existing Secret
+(`authSecret`), and its node state is persisted in a Kubernetes Secret so the
 node keeps its identity across pod restarts.
 
 ## Templates
@@ -17,11 +17,10 @@ node keeps its identity across pod restarts.
 | Template | Renders | What it does |
 |----------|---------|--------------|
 | `_helpers.tpl` | — | Shared name/label helpers (`fullname`, `labels`, `selectorLabels`). |
-| `deployment.yaml` | `Deployment` | The tailscaled pod. Sets `TS_HOSTNAME`, mounts the serve config, reads the auth key from `authSecret` (or the Vault-synced Secret), and persists state to the `<fullname>-state` Secret. |
+| `deployment.yaml` | `Deployment` | The tailscaled pod. Sets `TS_HOSTNAME`, mounts the serve config, reads the auth key from `authSecret`, and persists state to the `<fullname>-state` Secret. |
 | `configmap.yaml` | `ConfigMap` | Builds the tailscale serve config (the `serve` key) from `tailscale.tcpForward`, one `TCPForward` entry per port. |
 | `rbac.yaml` | `ServiceAccount` + `Role` + `RoleBinding` | The node's ServiceAccount and the minimal RBAC that lets tailscaled create/read/update its state Secret. |
 | `servers.sops.yaml` | `SopsSecret` | The control server (`TS_LOGIN_SERVER`) and log server (`TS_LOG_TARGET`) URLs, SOPS-encrypted. The same for every release; one per namespace, so at most one release per namespace. |
-| `staticsecret.yaml` | `VaultStaticSecret` | Syncs the tailnet auth key from Vault into a Secret named `<release>-auth` (with a `TS_AUTHKEY` field), via an **existing** `VaultAuth` (`vault.authRef`). Not rendered when `authSecret` is set. |
 
 ## Values
 
@@ -53,10 +52,7 @@ spec:
               - port: 80
                 targetPort: 80
                 service: traefik
-          vault:
-            authRef: vault-k8s
-            mount: k3s-infra
-            path: traefik/tailscale
+          authSecret: tailscale-auth   # from a SopsSecret in apps/infra/traefik
   destination:
     namespace: traefik
     server: https://kubernetes.default.svc
@@ -66,13 +62,5 @@ spec:
 
 - **sops-secrets-operator** installed: the control and log server URLs come
   from `servers.sops.yaml`, encrypted into the chart.
-
-With `authSecret` set: a Secret of that name in the release namespace with a
-`TS_AUTHKEY` field.
-
-Without it (Vault, being migrated away from):
-
-- **Vault Secrets Operator** installed.
-- An existing `VaultAuth` named `vault.authRef` in the release namespace (with
-  its `VaultConnection` and a Kubernetes auth role bound to its ServiceAccount).
-- A KV-v2 secret at `vault.mount`/`vault.path` containing a `TS_AUTHKEY` field.
+- A Secret named `authSecret` in the release namespace with a `TS_AUTHKEY`
+  field.

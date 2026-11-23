@@ -17,7 +17,7 @@ spec:
             description: >-
               No cloudflared replica has a connection to the Cloudflare edge,
               so every public hostname is unreachable. Check the cloudflared
-              logs, the tunnel token in Vault, and egress on 7844.
+              logs, the tunnel-token Secret, and egress on 7844.
           expr: |-
             sum(cloudflared_tunnel_ha_connections) < 1
               or absent(cloudflared_tunnel_ha_connections)

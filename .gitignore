@@ -3,9 +3,3 @@
 cloudflare-token.txt
 tailscale-authkey.txt
 .op
-
-# Vault data (Raft storage + unseal state)
-vault/vault1/data/
-
-# Vault snapshots pulled out of restic for a restore
-vault/restore/

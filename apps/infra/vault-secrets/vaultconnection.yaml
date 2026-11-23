@@ -1,8 +1,0 @@
-# Tells the operator *where* Vault lives.
-apiVersion: secrets.hashicorp.com/v1beta1
-kind: VaultConnection
-metadata:
-  name: vault
-  namespace: vault-secrets
-spec:
-  address: "https://vault.int.felixwallner.com"

@@ -5,5 +5,3 @@ metadata:
 data:
   clusterName: authentik-postgres
   destinationPath: s3://authentik-bucket/
-  vaultMount: k3s-infra
-  vaultPath: authentik/backup

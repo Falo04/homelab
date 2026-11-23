@@ -20,20 +20,18 @@ metadata:
 data:
   clusterName: <app>-postgres
   destinationPath: s3://<app>-bucket/
-  vaultMount: k3s-<type>
-  vaultPath: <app>/backup
 ```
 
 The bucket must already exist in Garage, with an access key whose
-`ACCESS_KEY_ID` / `ACCESS_SECRET_KEY` are stored at `k3s-infra/<app>/backup`
-in Vault. The namespace also needs `vault-auth.yaml` (all app namespaces
-already have it).
+`ACCESS_KEY_ID` / `ACCESS_SECRET_KEY` are in `cnpg-backup-secret.sops.yaml`, a
+SopsSecret producing Secret `cnpg-backup-s3` (see [secrets.md](secrets.md)).
 
 **2.** `kustomization.yaml`, add the values file and the component:
 
 ```yaml
 resources:
   - backup-values.yaml
+  - cnpg-backup-secret.sops.yaml
   - postgres.yaml
 
 components:

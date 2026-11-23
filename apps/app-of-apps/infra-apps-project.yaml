@@ -27,8 +27,6 @@ spec:
     - server: https://kubernetes.default.svc
       namespace: kube-system
     - server: https://kubernetes.default.svc
-      namespace: vault-secrets
-    - server: https://kubernetes.default.svc
       namespace: vault-secrets-operator
     - server: https://kubernetes.default.svc
       namespace: sops-secrets-operator

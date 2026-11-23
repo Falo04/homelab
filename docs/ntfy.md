@@ -13,9 +13,9 @@ over the cluster network; phones subscribe over Tailscale.
 | `alertmanager` | user  | Alertmanager webhook  | `homelab-alerts` write |
 | `grafana`      | user  | Grafana contact point | `homelab-alerts` write |
 | `wallos`       | user  | Wallos publisher      | `wallos` write         |
-| `vault-backup` | user  | Vault snapshot job    | `homelab-alerts` write |
 
-ACLs live in `apps/infra/ntfy/server.yml`. Users and tokens live in Vault.
+ACLs live in `apps/infra/ntfy/server.yml`. Users and tokens live in
+`apps/infra/ntfy/auth-secret.sops.yaml`.
 
 ### 1. Generate hashes and tokens
 
@@ -28,30 +28,18 @@ docker run --rm -it binwiederhier/ntfy:v2.28.0 user hash
 docker run --rm binwiederhier/ntfy:v2.28.0 token generate
 ```
 
-### 2. Store them in Vault
+### 2. Store them
 
-Single quotes matter, bcrypt hashes contain `$`.
+With `sops edit` (see [secrets.md](secrets.md)):
 
-```bash
-vault kv put k3s-infra/ntfy/auth \
-  NTFY_AUTH_USERS='felix:<hash>:admin,alertmanager:<hash>:user,grafana:<hash>:user,wallos:<hash>:user,vault-backup:<hash>:user' \
-  NTFY_AUTH_TOKENS='alertmanager:<am-token>:Alertmanager,grafana:<grafana-token>:Grafana,wallos:<wallos-token>:Wallos,vault-backup:<vb-token>:VaultBackup'
+- `apps/infra/ntfy/auth-secret.sops.yaml`:
+  `NTFY_AUTH_USERS: "felix:<hash>:admin,alertmanager:<hash>:user,grafana:<hash>:user,wallos:<hash>:user"`
+  and `NTFY_AUTH_TOKENS: "alertmanager:<am-token>:Alertmanager,grafana:<grafana-token>:Grafana,wallos:<wallos-token>:Wallos"`,
+  then restart ntfy.
+- `apps/infra/monitoring/ntfy-secret.sops.yaml`: `token: <am-token>`
+- `apps/infra/grafana/ntfy-secret.sops.yaml`: `token: <grafana-token>`
 
-vault kv put k3s-infra/monitoring/ntfy token='<am-token>'
-vault kv put k3s-infra/grafana/ntfy token='<grafana-token>'
-```
-
-`vault-backup` is the exception: its job runs on the Docker host, outside the
-cluster, so its token goes into `vault/vault-backup.env` rather than a second
-Vault path. See [vault-backup.md](vault-backup.md).
-
-The Vault policy is namespace-scoped, so each token is stored once for ntfy and
-once for the namespace that uses it.
-
-### 3. Let the new namespaces log in
-
-Re-run the role write from `01-setup.md` 4.3 with `monitoring` and `ntfy` added
-to `bound_service_account_namespaces`.
+Each token is stored once for ntfy and once for the namespace that uses it.
 
 ## Test
 

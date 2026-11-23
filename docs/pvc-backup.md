@@ -19,8 +19,6 @@ metadata:
 data:
   claimName: <app>-data
   repository: s3:https://s3.nas.felixwallner.com/<app>-bucket/restic
-  vaultMount: k3s-services # k3s-infra for apps under apps/infra
-  vaultPath: <app>/backup
   sqliteDatabases: "db/<app>.db" # PVC-relative, space separated, may be ""
 ```
 
@@ -31,6 +29,7 @@ namespace: <app>
 
 resources:
   - pvc-backup-values.yaml
+  - pvc-backup-secret.sops.yaml
   - pvc.yaml
 
 components:
@@ -38,13 +37,13 @@ components:
 ```
 
 Prerequisites, same as CNPG plus one: the bucket must exist in Garage, and
-`<vaultMount>/<vaultPath>` must hold `ACCESS_KEY_ID`, `ACCESS_SECRET_KEY` **and
-`RESTIC_PASSWORD`**. The restic password is what the repository is encrypted
-with, lose it and the backups are unreadable, so it belongs in Vault and
-nowhere else. The namespace also needs `vault-auth.yaml`.
+`pvc-backup-secret.sops.yaml`, a SopsSecret producing Secret `pvc-backup-s3`,
+must hold `ACCESS_KEY_ID`, `ACCESS_SECRET_KEY` **and `RESTIC_PASSWORD`** (see
+[secrets.md](secrets.md)). The restic password is what the repository is
+encrypted with, lose it and the backups are unreadable.
 
-An app that already has CNPG backups can reuse its existing Garage key; only
-`RESTIC_PASSWORD` has to be added to the same Vault path. The restic repository
+An app that already has CNPG backups can reuse its existing Garage key in a
+second SopsSecret, plus `RESTIC_PASSWORD`. The restic repository
 lives under a `restic/` prefix so it does not collide with barman-cloud's
 layout in the same bucket.
 

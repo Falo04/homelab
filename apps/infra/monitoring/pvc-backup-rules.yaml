@@ -55,7 +55,7 @@ spec:
             description: >-
               A pvc-backup CronJob exists in {{ $labels.namespace }} but has
               never completed successfully. Check that the Garage bucket exists
-              and that RESTIC_PASSWORD is present at the configured Vault path.
+              and that RESTIC_PASSWORD is present in the pvc-backup-s3 Secret.
           expr: |-
             kube_cronjob_info{cronjob="pvc-backup"} == 1
               unless on (namespace) kube_cronjob_status_last_successful_time{cronjob="pvc-backup"}

@@ -1,7 +1,7 @@
 # Second pvc-backup CronJob, for trek-uploads. The component handles one PVC
 # per kustomization, so it is instantiated again here with a name suffix. The
 # Garage credentials are shared: the parent's pvc-backup-secret.sops.yaml
-# already creates pvc-backup-s3, so this copy drops its VaultStaticSecret. Synced as a separate
+# creates pvc-backup-s3 for both. Synced as a separate
 # source of the trek Application: kustomize cannot nest it under ../, the two
 # components would match each other's values ConfigMap.
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -17,15 +17,6 @@ components:
   - ../../../../base/pvc-backup
 
 patches:
-  - target:
-      kind: VaultStaticSecret
-      name: vault-pvc-backup
-    patch: |
-      $patch: delete
-      apiVersion: secrets.hashicorp.com/v1beta1
-      kind: VaultStaticSecret
-      metadata:
-        name: vault-pvc-backup
   # Run after the data backup instead of alongside it.
   - target:
       kind: CronJob
