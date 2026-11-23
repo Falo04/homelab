@@ -20,6 +20,7 @@ node keeps its identity across pod restarts.
 | `deployment.yaml` | `Deployment` | The tailscaled pod. Sets `TS_HOSTNAME`, mounts the serve config, reads the auth key from `authSecret` (or the Vault-synced Secret), and persists state to the `<fullname>-state` Secret. |
 | `configmap.yaml` | `ConfigMap` | Builds the tailscale serve config (the `serve` key) from `tailscale.tcpForward`, one `TCPForward` entry per port. |
 | `rbac.yaml` | `ServiceAccount` + `Role` + `RoleBinding` | The node's ServiceAccount and the minimal RBAC that lets tailscaled create/read/update its state Secret. |
+| `servers.sops.yaml` | `SopsSecret` | The control server (`TS_LOGIN_SERVER`) and log server (`TS_LOG_TARGET`) URLs, SOPS-encrypted. The same for every release; one per namespace, so at most one release per namespace. |
 | `staticsecret.yaml` | `VaultStaticSecret` | Syncs the tailnet auth key from Vault into a Secret named `<release>-auth` (with a `TS_AUTHKEY` field), via an **existing** `VaultAuth` (`vault.authRef`). Not rendered when `authSecret` is set. |
 
 ## Values
@@ -63,8 +64,11 @@ spec:
 
 ## Prerequisites
 
+- **sops-secrets-operator** installed: the control and log server URLs come
+  from `servers.sops.yaml`, encrypted into the chart.
+
 With `authSecret` set: a Secret of that name in the release namespace with a
-`TS_AUTHKEY` field. That's all.
+`TS_AUTHKEY` field.
 
 Without it (Vault, being migrated away from):
 

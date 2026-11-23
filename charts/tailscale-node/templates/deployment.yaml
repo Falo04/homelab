@@ -47,8 +47,18 @@ spec:
               value: "true"
             - name: TS_SERVE_CONFIG
               value: /etc/ts-serve/serve
+            - name: TS_LOGIN_SERVER
+              valueFrom:
+                secretKeyRef:
+                  name: tailscale-servers
+                  key: TS_LOGIN_SERVER
+            - name: TS_LOG_TARGET
+              valueFrom:
+                secretKeyRef:
+                  name: tailscale-servers
+                  key: TS_LOG_TARGET
             - name: TS_EXTRA_ARGS
-              value: "--login-server=https://sdn.felixwallner.com"
+              value: "--login-server=$(TS_LOGIN_SERVER)"
             - name: TS_AUTHKEY
               valueFrom:
                 secretKeyRef:

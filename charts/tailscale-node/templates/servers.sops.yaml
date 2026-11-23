@@ -1,0 +1,49 @@
+# Control and log server of every tailnet node. Same for all releases, so it
+# lives in the chart; each release gets its own copy in its namespace.
+apiVersion: isindir.github.com/v1alpha3
+kind: SopsSecret
+metadata:
+    name: tailscale-servers
+spec:
+    secretTemplates:
+        - name: tailscale-servers
+          stringData:
+            TS_LOGIN_SERVER: ENC[AES256_GCM,data:PY9F0EziSMciB0qOwuIC0e4HfsKk5V2+y+aXhQ==,iv:g1w3k1XilQWzSip9+RXHKwi2j8h8gYr5CtN2hWwsCN4=,tag:T8GNot4SSR0hC6ZLCPFugA==,type:str]
+            TS_LOG_TARGET: ENC[AES256_GCM,data:Bd3pH9pPCgkN9IZMrTTKYXi4XQCiObXXXkW9kzQeFetzQmi2VQ==,iv:LM4gCmfCegYhnDjubhpmPxa3jST37Uidf9lGzQwOlYg=,tag:5gTV9a9tlawazf51f30u4g==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBiV1ZuUitiY1RoZ3ErdHdp
+            NmR3ekFLK0tQeXNmdkdKZ3RXdHQ5OHZtd0hnCnhBMlR6QWdEUlBJVWg3SnZxVmFD
+            SDBCWEY0cGFpSWoxTDU3Ry80Q0FlWkEKLS0tIEZZcTBTUTN3RW0yMjhJSDZoVDNU
+            aStkU0VSSzlHVEVDT3g3dU5nSGp4aWMKJuPHQ4JrM652E3J9IKjt6nAqIwikGPzH
+            ysIpKhWQzAOQ4clr9+K4oFS53bNBm2N7icUUw13ZYkdBLZqiVOTnvA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1p4mglv45a3tg8nh7cfrpfyut2adf3mmjaarw8lgn6fhd2q5wf3wqecfnjh
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-11-23T18:53:14Z"
+    mac: ENC[AES256_GCM,data:R0WK5uG2RwaS7qRgx+IjZUnIVekYVpnICOHOD7VyfrprcOI63VLrTf409kengr+0upXDWQ1kmqMVgAhv19ROdXCFbBhB8r2P91WfhuWyNTQA65/RdHqocJr352UWDPN8sPFa3zAVsy+sktjDkndywNiVK9t/90kFI0D+HUw6Kts=,iv:7lA6MozkrdycJ8kOBS48IKZzzPPw79Vw8ZG9p3y+/+Q=,tag:qefFQXm/zEZ7wLNOVcv1pQ==,type:str]
+    mac_only_encrypted: true
+    pgp:
+        - created_at: "2026-11-23T18:53:14Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMAwAAAAAAAAAAAQ//TX3D5Y4FFHH5X5GbfgMF5JrAeQwX4ulKi/mi7AbyZ068
+            TR1Sg9D+eEbA5Y4O8rii3LCo0gFETOhqpzVxEcwSi6MmPM6ChlexiEf2bgKDWPyO
+            /wg5dZUQEZquT5re/uTZ/VdurgAZwpy6xy4gbhNArZFQ/GN8VKB3pwYIaZwsNwCq
+            LIXgi/gd8wxaXIoIfHj/ZHGySuEBXsQSePdg4doFWo0Wi9jBfpsQDKg1kPZxVmjZ
+            RPEVCmLxv+/iayPtFMbYt5h2VGKxAbUrwtuWoBL4oFTtG8r+34RaiMFCVoC1W5lP
+            anUKnvfzlNezdZWnaJ3QJFHK1XgXseLLhdbK/K+Kxo4bQ8fHeKxZzHxlDAkrYt1z
+            J6IloZKLXEP+AtUsgPI3g6WiYAXQy3w5WTShcHG5uIkiqOrVNNJJAbck/1no1yXu
+            eyJdYgRNin7OI9tSrKZJcOadYXjUN0ieBW6D5UtPRLjGJwT0SjwNI9W3i03UzrJ1
+            J1mqIv2jiwBDYT/scNrzD2b6XzIMNT8DGoHr4IcrH3y4joCF68oF95k7sA4ygix7
+            3eyZWKKYSRlPMANpgHZVUs40sXy8BuVs1yyE8qlR9TXfi8AUBVZi1sGA74tmoycV
+            jq6XC9wXjg29QoxECecxxnYOxn8PxaAtQxX8ShQzfRJgp62w8JayBUtCwyBNWLDS
+            XgHFvCQoAm4jcU4TwFP4L7HlFLXGDZD192zK9I8IEAkGDHiBjCMlndFyvwe59kRg
+            cRL8Wljzs66zBinUqs5Ozh+QtTnfMFq0FndKWlcrUWltw1294rAhqwKnXgwO3dk=
+            =f/B2
+            -----END PGP MESSAGE-----
+          fp: 5C2BBDB8C7D402C02F2A1FD426845014B07C525D
+    version: 3.13.3
