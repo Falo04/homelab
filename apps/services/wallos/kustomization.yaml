@@ -5,8 +5,9 @@ namespace: wallos
 
 resources:
   - namespace.yaml
-  - vault-auth.yaml
-  - oidc-secret.yaml
+  - oidc-secret.sops.yaml
+  - tailscale-secret.sops.yaml
+  - pvc-backup-secret.sops.yaml
   - pvc-backup-values.yaml
   - pvc.yaml
   - deployment.yaml
@@ -16,3 +17,14 @@ resources:
 components:
   - ../../../base/pvc-backup
   - ../../../base/network-policy
+
+patches:
+  # The pvc-backup component still brings a VaultStaticSecret for the apps that
+  # haven't moved off Vault yet. Here pvc-backup-s3 comes from
+  # pvc-backup-secret.sops.yaml instead.
+  - patch: |-
+      $patch: delete
+      apiVersion: secrets.hashicorp.com/v1beta1
+      kind: VaultStaticSecret
+      metadata:
+        name: vault-pvc-backup
