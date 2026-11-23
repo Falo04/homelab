@@ -15,9 +15,14 @@ pod:
   # Override the full resource name (defaults to the release name).
   fullnameOverride: ""
 
+# Name of an existing Secret in the release namespace with a `TS_AUTHKEY`
+# field, e.g. one made by a SopsSecret next to the app. When set, the `vault`
+# block below is ignored and no VaultStaticSecret is rendered.
+authSecret: ""
+
 # The tailnet auth key is synced from Vault by the Vault Secrets Operator. This
 # chart only creates the VaultStaticSecret; the VaultAuth it references and must
-# already exist.
+# already exist. Only used while `authSecret` is empty.
 vault:
   # Name of an existing VaultAuth in the release namespace to authenticate with.
   authRef: ""

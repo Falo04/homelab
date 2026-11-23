@@ -28,6 +28,13 @@
       "datasourceTemplate": "helm",
       "depNameTemplate": "argo-cd",
       "registryUrlTemplate": "https://argoproj.github.io/argo-helm"
+    },
+    {
+      "customType": "regex",
+      "description": "Digest-pinned images in Argo CD Application Helm values",
+      "managerFilePatterns": ["/^apps/infra/applications/.+\\.ya?ml$/"],
+      "matchStrings": ["repository: (?<depName>\\S+)\\n\\s+tag: \"(?<currentValue>[^@\"]+)@(?<currentDigest>sha256:[a-f0-9]+)\""],
+      "datasourceTemplate": "docker"
     }
   ],
   "packageRules": [
@@ -41,6 +48,12 @@
       "matchDepNames": ["hashicorp/vault"],
       "separateMajorMinor": true,
       "separateMultipleMinor": true,
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "sops-secrets-operator holds the cluster key: chart and image together, manual approval",
+      "matchDepNames": ["sops-secrets-operator", "quay.io/isindir/sops-secrets-operator"],
+      "groupName": "sops-secrets-operator",
       "dependencyDashboardApproval": true
     },
     {

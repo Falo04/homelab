@@ -52,7 +52,7 @@ spec:
             - name: TS_AUTHKEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "tailscale-node.fullname" . }}-auth
+                  name: {{ .Values.authSecret | default (printf "%s-auth" (include "tailscale-node.fullname" .)) }}
                   key: TS_AUTHKEY
             - name: POD_NAME
               valueFrom:

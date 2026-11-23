@@ -4,3 +4,12 @@ repos:
     rev: v8.30.1
     hooks:
       - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: sops-encrypted
+        name: sops-encrypted
+        entry: scripts/check-sops-encrypted.sh
+        language: script
+        files: \.sops\.yaml$
+        exclude: ^\.sops\.yaml$

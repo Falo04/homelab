@@ -1,0 +1,6 @@
+creation_rules:
+  - path_regex: \.sops\.yaml$
+    encrypted_regex: ^(data|stringData)$
+    mac_only_encrypted: true
+    age: age1p4mglv45a3tg8nh7cfrpfyut2adf3mmjaarw8lgn6fhd2q5wf3wqecfnjh
+    pgp: 5C2BBDB8C7D402C02F2A1FD426845014B07C525D

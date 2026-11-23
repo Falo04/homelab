@@ -13,6 +13,7 @@ resources:
   - grafana.yaml
   - kube-prometheus-stack.yaml
   - loki.yaml
+  - sops-secrets-operator.yaml
   - ntfy.yaml
   - tempo.yaml
   - vault-secrets-operator.yaml

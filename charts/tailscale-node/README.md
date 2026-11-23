@@ -2,7 +2,7 @@
 
 A Helm chart for a single **userspace Tailscale node** that fronts an in-cluster
 Service on your tailnet. Each release is one tailnet node with its own hostname,
-its own auth key (pulled from Vault), and its own set of TCP forwards.
+its own auth key (from an existing Secret, or pulled from Vault), and its own set of TCP forwards.
 
 ## How it works
 
@@ -17,10 +17,10 @@ node keeps its identity across pod restarts.
 | Template | Renders | What it does |
 |----------|---------|--------------|
 | `_helpers.tpl` | — | Shared name/label helpers (`fullname`, `labels`, `selectorLabels`). |
-| `deployment.yaml` | `Deployment` | The tailscaled pod. Sets `TS_HOSTNAME`, mounts the serve config, reads the auth key from the Vault-synced Secret, and persists state to the `<fullname>-state` Secret. |
+| `deployment.yaml` | `Deployment` | The tailscaled pod. Sets `TS_HOSTNAME`, mounts the serve config, reads the auth key from `authSecret` (or the Vault-synced Secret), and persists state to the `<fullname>-state` Secret. |
 | `configmap.yaml` | `ConfigMap` | Builds the tailscale serve config (the `serve` key) from `tailscale.tcpForward`, one `TCPForward` entry per port. |
 | `rbac.yaml` | `ServiceAccount` + `Role` + `RoleBinding` | The node's ServiceAccount and the minimal RBAC that lets tailscaled create/read/update its state Secret. |
-| `staticsecret.yaml` | `VaultStaticSecret` | Syncs the tailnet auth key from Vault into a Secret named `<release>-auth` (with a `TS_AUTHKEY` field), via an **existing** `VaultAuth` (`vault.authRef`). |
+| `staticsecret.yaml` | `VaultStaticSecret` | Syncs the tailnet auth key from Vault into a Secret named `<release>-auth` (with a `TS_AUTHKEY` field), via an **existing** `VaultAuth` (`vault.authRef`). Not rendered when `authSecret` is set. |
 
 ## Values
 
@@ -62,6 +62,11 @@ spec:
 ```
 
 ## Prerequisites
+
+With `authSecret` set: a Secret of that name in the release namespace with a
+`TS_AUTHKEY` field. That's all.
+
+Without it (Vault, being migrated away from):
 
 - **Vault Secrets Operator** installed.
 - An existing `VaultAuth` named `vault.authRef` in the release namespace (with

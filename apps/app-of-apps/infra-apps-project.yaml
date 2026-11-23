@@ -16,6 +16,7 @@ spec:
     - https://grafana.github.io/helm-charts
     - https://prometheus-community.github.io/helm-charts
     - https://grafana-community.github.io/helm-charts
+    - https://isindir.github.io/sops-secrets-operator/
   destinations:
     - server: https://kubernetes.default.svc
       namespace: argocd
@@ -29,6 +30,8 @@ spec:
       namespace: vault-secrets
     - server: https://kubernetes.default.svc
       namespace: vault-secrets-operator
+    - server: https://kubernetes.default.svc
+      namespace: sops-secrets-operator
     - server: https://kubernetes.default.svc
       namespace: cnpg-system
     - server: https://kubernetes.default.svc

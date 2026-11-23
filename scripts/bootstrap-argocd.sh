@@ -7,11 +7,21 @@ set -euo pipefail
 # that Application says on the first sync.
 CHART_VERSION="10.18.0"
 NAMESPACE="argocd"
+# Must match apps/infra/applications/sops-secrets-operator.yaml.
+SOPS_NAMESPACE="sops-secrets-operator"
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 kubectl cluster-info >/dev/null 2>&1 || {
   echo "no reachable cluster, check your KUBECONFIG" >&2
+  exit 1
+}
+
+# Asked for up front so the script doesn't stop halfway to wait for it.
+read -rsp "SOPS cluster key (AGE-SECRET-KEY-...): " sops_cluster_key
+echo
+[[ "$sops_cluster_key" == AGE-SECRET-KEY-* ]] || {
+  echo "that doesn't look like an age private key" >&2
   exit 1
 }
 
@@ -29,6 +39,13 @@ helm upgrade --install argocd argo/argo-cd \
 
 echo "==> waiting for argocd-server"
 kubectl -n "$NAMESPACE" rollout status deploy/argocd-server --timeout=5m
+
+echo "==> creating the SOPS cluster key"
+kubectl create namespace "$SOPS_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+printf '%s\n' "$sops_cluster_key" |
+  kubectl -n "$SOPS_NAMESPACE" create secret generic sops-age-key \
+    --from-file=keys.txt=/dev/stdin --dry-run=client -o yaml |
+  kubectl apply -f -
 
 echo "==> applying the app-of-apps"
 kubectl apply -f "$repo_root/bootstrap/app-of-apps.yaml"
