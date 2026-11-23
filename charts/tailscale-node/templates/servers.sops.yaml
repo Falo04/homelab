@@ -9,7 +9,7 @@ spec:
         - name: tailscale-servers
           stringData:
             TS_LOGIN_SERVER: ENC[AES256_GCM,data:PY9F0EziSMciB0qOwuIC0e4HfsKk5V2+y+aXhQ==,iv:g1w3k1XilQWzSip9+RXHKwi2j8h8gYr5CtN2hWwsCN4=,tag:T8GNot4SSR0hC6ZLCPFugA==,type:str]
-            TS_LOG_TARGET: ENC[AES256_GCM,data:Bd3pH9pPCgkN9IZMrTTKYXi4XQCiObXXXkW9kzQeFetzQmi2VQ==,iv:LM4gCmfCegYhnDjubhpmPxa3jST37Uidf9lGzQwOlYg=,tag:5gTV9a9tlawazf51f30u4g==,type:str]
+            TS_LOG_TARGET: ENC[AES256_GCM,data:86UwVTIINZBEErDt82Aym/puH++Ow4ZLcyq3y4CBsLUfehXX,iv:Gp9eit5gyS6GNYQtNKNPkR6gvEMTf70Ig0uWgtjeeh0=,tag:9ohKQy9skR8aWlHjgbx2gw==,type:str]
 sops:
     age:
         - enc: |
@@ -22,8 +22,8 @@ sops:
             -----END AGE ENCRYPTED FILE-----
           recipient: age1p4mglv45a3tg8nh7cfrpfyut2adf3mmjaarw8lgn6fhd2q5wf3wqecfnjh
     encrypted_regex: ^(data|stringData)$
-    lastmodified: "2026-11-23T18:53:14Z"
-    mac: ENC[AES256_GCM,data:R0WK5uG2RwaS7qRgx+IjZUnIVekYVpnICOHOD7VyfrprcOI63VLrTf409kengr+0upXDWQ1kmqMVgAhv19ROdXCFbBhB8r2P91WfhuWyNTQA65/RdHqocJr352UWDPN8sPFa3zAVsy+sktjDkndywNiVK9t/90kFI0D+HUw6Kts=,iv:7lA6MozkrdycJ8kOBS48IKZzzPPw79Vw8ZG9p3y+/+Q=,tag:qefFQXm/zEZ7wLNOVcv1pQ==,type:str]
+    lastmodified: "2026-11-23T18:59:20Z"
+    mac: ENC[AES256_GCM,data:5MZoq4xaPkPLmyLoRkcAgA5VKFvWuzM4NVlDmU0HszgAnH+mBz8yl6L6YPrrn2o0dHMU+LvM9FMNzuMcGLCWwi87ABcxhOjFkS/HdGqhl/mZo3a+yTDj1S6eCOWIpbOqXnwvOHKxwlj8YJVDm+ZS8FozD1zlab++Nd1erJs4Wrk=,iv:Bw2nzmWgtPJLfXFVt8P40qT2FJLV2cpb2vFNNJiiJPU=,tag:Uo//B79WrxTXmfJoGfhnlA==,type:str]
     mac_only_encrypted: true
     pgp:
         - created_at: "2026-11-23T18:53:14Z"
