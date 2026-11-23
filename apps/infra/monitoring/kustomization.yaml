@@ -3,8 +3,7 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
-  - vault-auth.yaml
-  - ntfy-secret.yaml
+  - ntfy-secret.sops.yaml
   - cnpg-rules.yaml
   - cnpg-backup-rules.yaml
   - pvc-backup-rules.yaml

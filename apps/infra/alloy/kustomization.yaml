@@ -5,7 +5,7 @@ namespace: alloy
 
 resources:
   - namespace.yaml
-  - vault-auth.yaml
+  - tailscale-secret.sops.yaml
 
 components:
   - ../../../base/network-policy

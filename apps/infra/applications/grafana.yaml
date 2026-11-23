@@ -189,10 +189,7 @@ spec:
               - port: 80
                 targetPort: 80
                 service: grafana-ingress
-          vault:
-            authRef: vault-k8s
-            mount: k3s-infra
-            path: grafana/tailscale
+          authSecret: tailscale-auth
 
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main

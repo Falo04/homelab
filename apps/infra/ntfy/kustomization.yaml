@@ -5,8 +5,9 @@ namespace: ntfy
 
 resources:
   - namespace.yaml
-  - vault-auth.yaml
-  - auth-secret.yaml
+  - auth-secret.sops.yaml
+  - tailscale-secret.sops.yaml
+  - cnpg-backup-secret.sops.yaml
   - backup-values.yaml
   - postgres.yaml
   - deployment.yaml
@@ -17,6 +18,17 @@ resources:
 components:
   - ../../../base/cnpg-backup
   - ../../../base/network-policy
+
+patches:
+  # The cnpg-backup component still brings a VaultStaticSecret for the apps that
+  # haven't moved off Vault yet. Here cnpg-backup-s3 comes from
+  # cnpg-backup-secret.sops.yaml instead.
+  - patch: |-
+      $patch: delete
+      apiVersion: secrets.hashicorp.com/v1beta1
+      kind: VaultStaticSecret
+      metadata:
+        name: vault-cnpg-backup
 
 configMapGenerator:
   - name: ntfy-config

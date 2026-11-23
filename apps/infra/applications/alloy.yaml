@@ -155,10 +155,7 @@ spec:
                 service: alloy
               - port: 4318
                 service: alloy
-          vault:
-            authRef: vault-k8s
-            mount: k3s-infra
-            path: alloy/tailscale
+          authSecret: tailscale-auth
   destination:
     server: https://kubernetes.default.svc
     namespace: alloy

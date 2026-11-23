@@ -3,10 +3,10 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
-  - vault-auth.yaml
-  - oidc-secret.yaml
-  - admin-secret.yaml
-  - ntfy-secret.yaml
+  - oidc-secret.sops.yaml
+  - admin-secret.sops.yaml
+  - ntfy-secret.sops.yaml
+  - tailscale-secret.sops.yaml
   - postgres.yaml
   - grafana-cert.yaml
 
