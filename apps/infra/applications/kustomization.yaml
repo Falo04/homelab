@@ -16,4 +16,3 @@ resources:
   - sops-secrets-operator.yaml
   - ntfy.yaml
   - tempo.yaml
-  - vault-secrets-operator.yaml

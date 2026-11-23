@@ -8,7 +8,6 @@ spec:
   sourceRepos:
     - https://github.com/Falo04/homelab.git
     - https://argoproj.github.io/argo-helm
-    - https://helm.releases.hashicorp.com
     - https://charts.jetstack.io
     - https://charts.goauthentik.io
     - https://github.com/cloudnative-pg/cloudnative-pg.git
@@ -26,8 +25,6 @@ spec:
       namespace: cloudflared
     - server: https://kubernetes.default.svc
       namespace: kube-system
-    - server: https://kubernetes.default.svc
-      namespace: vault-secrets-operator
     - server: https://kubernetes.default.svc
       namespace: sops-secrets-operator
     - server: https://kubernetes.default.svc
