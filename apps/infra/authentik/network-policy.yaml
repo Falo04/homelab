@@ -17,3 +17,55 @@ spec:
               kubernetes.io/metadata.name: cloudflared
       ports:
         - port: http
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: egress-lockdown
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: authentik
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: authentik-postgres
+      ports:
+        - port: 5432
+          protocol: TCP
+
+    - to:
+        - ipBlock:
+            cidr: 192.168.178.210/32
+      ports:
+        - port: 6443
+          protocol: TCP
+
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 100.64.0.0/10
+              - 169.254.0.0/16
+      ports:
+        - port: 443
+          protocol: TCP
