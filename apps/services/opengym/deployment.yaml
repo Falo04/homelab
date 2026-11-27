@@ -42,9 +42,9 @@ spec:
             - name: DATA_DIR
               value: /data
             - name: RP_ID
-              value: gym.int.felixwallner.com
+              value: opengym.int.felixwallner.com
             - name: ORIGIN
-              value: https://gym.int.felixwallner.com
+              value: https://opengym.int.felixwallner.com
             - name: FIRST_USER_ADMIN
               value: "1"
           volumeMounts:

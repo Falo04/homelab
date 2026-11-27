@@ -12,36 +12,16 @@ spec:
 
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
-      path: charts/tailscale-node
+      path: charts/tailnet-node
       helm:
-        releaseName: wallos-tailscale
+        releaseName: wallos
         valuesObject:
-          pod:
-            fullnameOverride: tailscale
-          tailscale:
-            hostname: wallos
-            tcpForward:
-              - port: 443
-                targetPort: 443
-                service: wallos-ingress
-              - port: 80
-                targetPort: 80
-                service: wallos-ingress
+          hostname: wallos
           authSecret: tailscale-auth
-
-    - repoURL: https://github.com/Falo04/homelab.git
-      targetRevision: main
-      path: charts/service-ingress
-      helm:
-        releaseName: wallos-ingress
-        valuesObject:
-          pod:
-            fullnameOverride: wallos-ingress
-          host: wallos.int.felixwallner.com
-          tlsSecret: wallos-tls
-          backend:
-            service: wallos
-            port: 80
+          ingress:
+            backend:
+              service: wallos
+              port: 80
 
   destination:
     server: https://kubernetes.default.svc

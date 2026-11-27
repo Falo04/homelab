@@ -12,7 +12,6 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
-  - livesync-cert.yaml
 
 components:
   - ../../../base/pvc-backup

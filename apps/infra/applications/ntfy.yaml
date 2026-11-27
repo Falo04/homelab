@@ -12,36 +12,16 @@ spec:
 
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
-      path: charts/tailscale-node
+      path: charts/tailnet-node
       helm:
-        releaseName: ntfy-tailscale
+        releaseName: ntfy
         valuesObject:
-          pod:
-            fullnameOverride: tailscale
-          tailscale:
-            hostname: ntfy
-            tcpForward:
-              - port: 443
-                targetPort: 443
-                service: ntfy-ingress
-              - port: 80
-                targetPort: 80
-                service: ntfy-ingress
+          hostname: ntfy
           authSecret: tailscale-auth
-
-    - repoURL: https://github.com/Falo04/homelab.git
-      targetRevision: main
-      path: charts/service-ingress
-      helm:
-        releaseName: ntfy-ingress
-        valuesObject:
-          pod:
-            fullnameOverride: ntfy-ingress
-          host: ntfy.int.felixwallner.com
-          tlsSecret: ntfy-tls
-          backend:
-            service: ntfy
-            port: 80
+          ingress:
+            backend:
+              service: ntfy
+              port: 80
 
   destination:
     server: https://kubernetes.default.svc

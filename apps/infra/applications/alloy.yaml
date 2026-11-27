@@ -144,18 +144,20 @@ spec:
 
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
-      path: charts/tailscale-node
+      path: charts/tailnet-node
       helm:
-        releaseName: otel-tailscale
+        releaseName: otel
         valuesObject:
+          hostname: otel
+          authSecret: tailscale-auth
+          ingress:
+            enabled: false
           tailscale:
-            hostname: otel
             tcpForward:
               - port: 4317
                 service: alloy
               - port: 4318
                 service: alloy
-          authSecret: tailscale-auth
   destination:
     server: https://kubernetes.default.svc
     namespace: alloy

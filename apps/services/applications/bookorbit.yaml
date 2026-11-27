@@ -12,38 +12,18 @@ spec:
 
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
-      path: charts/tailscale-node
+      path: charts/tailnet-node
       helm:
-        releaseName: bookorbit-tailscale
+        releaseName: bookorbit
         valuesObject:
-          pod:
-            fullnameOverride: tailscale
-          tailscale:
-            hostname: bookorbit
-            tcpForward:
-              - port: 443
-                targetPort: 443
-                service: bookorbit-ingress
-              - port: 80
-                targetPort: 80
-                service: bookorbit-ingress
+          hostname: bookorbit
           authSecret: tailscale-auth
-
-    - repoURL: https://github.com/Falo04/homelab.git
-      targetRevision: main
-      path: charts/service-ingress
-      helm:
-        releaseName: bookorbit-ingress
-        valuesObject:
-          pod:
-            fullnameOverride: bookorbit-ingress
-          host: books.int.felixwallner.com
-          tlsSecret: bookorbit-tls
-          # Book uploads; illustrated EPUBs and PDFs easily exceed the default.
-          maxBodySize: 512m
-          backend:
-            service: bookorbit
-            port: 80
+          ingress:
+            # Book uploads; illustrated EPUBs and PDFs easily exceed the default.
+            maxBodySize: 512m
+            backend:
+              service: bookorbit
+              port: 80
 
   destination:
     server: https://kubernetes.default.svc

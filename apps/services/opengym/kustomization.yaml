@@ -11,7 +11,6 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
-  - opengym-cert.yaml
 
 components:
   - ../../../base/pvc-backup

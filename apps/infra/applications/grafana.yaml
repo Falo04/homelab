@@ -174,36 +174,16 @@ spec:
 
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
-      path: charts/tailscale-node
+      path: charts/tailnet-node
       helm:
-        releaseName: grafana-tailscale
+        releaseName: grafana
         valuesObject:
-          pod:
-            fullnameOverride: tailscale
-          tailscale:
-            hostname: grafana
-            tcpForward:
-              - port: 443
-                targetPort: 443
-                service: grafana-ingress
-              - port: 80
-                targetPort: 80
-                service: grafana-ingress
+          hostname: grafana
           authSecret: tailscale-auth
-
-    - repoURL: https://github.com/Falo04/homelab.git
-      targetRevision: main
-      path: charts/service-ingress
-      helm:
-        releaseName: grafana-ingress
-        valuesObject:
-          pod:
-            fullnameOverride: grafana-ingress
-          host: grafana.int.felixwallner.com
-          tlsSecret: grafana-tls
-          backend:
-            service: grafana
-            port: 80
+          ingress:
+            backend:
+              service: grafana
+              port: 80
 
   destination:
     server: https://kubernetes.default.svc
