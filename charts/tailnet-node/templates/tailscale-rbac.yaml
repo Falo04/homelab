@@ -1,26 +1,27 @@
+{{- $ctx := dict "ctx" . "component" "tailscale" }}
 # tailscaled persists its node state in a Secret so it survives pod restarts;
 # these are the only permissions containerboot needs to manage it.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ include "tailscale-node.fullname" . }}
+  name: {{ include "tailnet-node.fullname" $ctx }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "tailscale-node.labels" . | nindent 4 }}
+    {{- include "tailnet-node.labels" $ctx | nindent 4 }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ include "tailscale-node.fullname" . }}
+  name: {{ include "tailnet-node.fullname" $ctx }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "tailscale-node.labels" . | nindent 4 }}
+    {{- include "tailnet-node.labels" $ctx | nindent 4 }}
 rules:
   - apiGroups: [""]
     resources: ["secrets"]
     verbs: ["create"]
   - apiGroups: [""]
-    resourceNames: ["{{ include "tailscale-node.fullname" . }}-state"]
+    resourceNames: ["tailscale-state"]
     resources: ["secrets"]
     verbs: ["get", "update", "patch"]
   - apiGroups: [""]
@@ -30,15 +31,15 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ include "tailscale-node.fullname" . }}
+  name: {{ include "tailnet-node.fullname" $ctx }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "tailscale-node.labels" . | nindent 4 }}
+    {{- include "tailnet-node.labels" $ctx | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ include "tailscale-node.fullname" . }}
+  name: {{ include "tailnet-node.fullname" $ctx }}
 subjects:
   - kind: ServiceAccount
-    name: {{ include "tailscale-node.fullname" . }}
+    name: {{ include "tailnet-node.fullname" $ctx }}
     namespace: {{ .Release.Namespace }}

@@ -1,0 +1,80 @@
+# Tailnet hostname of the node (TS_HOSTNAME). Tailnet DNS resolves it as
+# `<hostname>.<domain>`, which is also the name nginx serves and the
+# certificate covers. Required.
+hostname: ""
+
+# DNS suffix the tailnet maps node hostnames under.
+domain: int.felixwallner.com
+
+# Name of an existing Secret in the release namespace with a `TS_AUTHKEY`
+# field, e.g. one made by a SopsSecret next to the app. Required.
+authSecret: ""
+
+tailscale:
+  # Container image for the userspace tailscaled node.
+  image:
+    # Image repository.
+    repository: ghcr.io/tailscale/tailscale
+    # Image tag (Tailscale version).
+    tag: v1.98.10
+    # Pull policy for the image.
+    pullPolicy: IfNotPresent
+
+  # Extra TCP forwards rendered into the tailscale serve config. Each entry
+  # exposes a port on the tailnet node and forwards it to an in-cluster Service.
+  # With `ingress.enabled`, 443 and 80 already forward to nginx.
+  tcpForward: []
+    # # Port the tailnet node listens on.
+    # - port: 4317
+    #   # Backend port to forward to (defaults to `port` when omitted).
+    #   targetPort: 4317
+    #   # Backend Service name, in the release namespace.
+    #   service: alloy
+
+  # Resource requests/limits for the tailscale container.
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+# nginx that terminates TLS for `<hostname>.<domain>` with a cert-manager
+# certificate and proxies to `backend`. Turn off for a node that only forwards
+# raw TCP (`tailscale.tcpForward`).
+ingress:
+  # Render nginx, its Service and the Certificate.
+  enabled: true
+
+  # Container image for the nginx reverse proxy. The unprivileged variant listens
+  # above 1024 and keeps its temp files under /tmp, so it needs no capabilities.
+  image:
+    # Image repository.
+    repository: nginxinc/nginx-unprivileged
+    # Image tag (nginx version).
+    tag: 1.29-alpine
+    # Pull policy for the image.
+    pullPolicy: IfNotPresent
+
+  # ClusterIssuer that signs the certificate.
+  issuer: letsencrypt-dns
+
+  # The single backend this proxy forwards to.
+  backend:
+    # Backend Service name, in the release namespace.
+    service: ""
+    # Backend Service port.
+    port: 80
+
+  # Largest request body nginx accepts, e.g. for file uploads.
+  maxBodySize: 32m
+
+  # Resource requests/limits for the nginx container.
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
