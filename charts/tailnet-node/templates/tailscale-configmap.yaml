@@ -1,0 +1,26 @@
+{{- $ctx := dict "ctx" . "component" "tailscale" }}
+{{- $forwards := list }}
+{{- if .Values.ingress.enabled }}
+{{- $nginx := include "tailnet-node.fullname" (dict "ctx" . "component" "nginx") }}
+{{- $forwards = append $forwards (dict "port" 443 "service" $nginx) }}
+{{- $forwards = append $forwards (dict "port" 80 "service" $nginx) }}
+{{- end }}
+{{- $forwards = concat $forwards .Values.tailscale.tcpForward }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "tailnet-node.fullname" $ctx }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "tailnet-node.labels" $ctx | nindent 4 }}
+data:
+  serve: |-
+    {
+      "TCP": {
+        {{- range $index, $item := $forwards }}
+        {{- $port := $item.targetPort | default $item.port }}
+        {{- if $index }},{{ end }}
+        "{{ $item.port }}": { "TCPForward": "{{ $item.service }}.{{ $.Release.Namespace }}.svc.cluster.local:{{ $port }}" }
+        {{- end }}
+      }
+    }

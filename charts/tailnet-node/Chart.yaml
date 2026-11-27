@@ -1,0 +1,6 @@
+apiVersion: v2
+name: tailnet-node
+description: A userspace Tailscale node with an optional nginx that terminates TLS for one in-cluster service.
+type: application
+version: 0.1.0
+appVersion: "1.98.10"

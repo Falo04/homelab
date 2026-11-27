@@ -8,7 +8,6 @@ resources:
   - ntfy-secret.sops.yaml
   - tailscale-secret.sops.yaml
   - postgres.yaml
-  - grafana-cert.yaml
 
 components:
   - ../../../base/network-policy

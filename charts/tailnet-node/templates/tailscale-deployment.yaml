@@ -1,25 +1,22 @@
+{{- $ctx := dict "ctx" . "component" "tailscale" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "tailscale-node.fullname" . }}
+  name: {{ include "tailnet-node.fullname" $ctx }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "tailscale-node.labels" . | nindent 4 }}
+    {{- include "tailnet-node.labels" $ctx | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "tailscale-node.selectorLabels" . | nindent 6 }}
+      {{- include "tailnet-node.selectorLabels" $ctx | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "tailscale-node.selectorLabels" . | nindent 8 }}
-      {{- with .Values.pod.annotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- include "tailnet-node.selectorLabels" $ctx | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "tailscale-node.fullname" . }}
+      serviceAccountName: {{ include "tailnet-node.fullname" $ctx }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -29,8 +26,8 @@ spec:
           type: RuntimeDefault
       containers:
         - name: tailscale
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.tailscale.image.repository }}:{{ .Values.tailscale.image.tag }}"
+          imagePullPolicy: {{ .Values.tailscale.image.pullPolicy }}
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
@@ -38,9 +35,11 @@ spec:
                 - ALL
           env:
             - name: TS_HOSTNAME
-              value: {{ .Values.tailscale.hostname | quote }}
+              value: {{ include "tailnet-node.hostname" . | quote }}
+            # Fixed, since there is one node per namespace (servers.sops.yaml);
+            # renaming it would lose the node's tailnet identity.
             - name: TS_KUBE_SECRET
-              value: {{ include "tailscale-node.fullname" . }}-state
+              value: tailscale-state
             - name: TS_USERSPACE
               value: "true"
             - name: TS_AUTH_ONCE
@@ -77,8 +76,8 @@ spec:
               mountPath: /etc/ts-serve
               readOnly: true
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.tailscale.resources | nindent 12 }}
       volumes:
         - name: serve-config
           configMap:
-            name: {{ include "tailscale-node.fullname" . }}-config
+            name: {{ include "tailnet-node.fullname" $ctx }}-config

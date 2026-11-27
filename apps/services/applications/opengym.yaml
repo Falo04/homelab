@@ -12,37 +12,17 @@ spec:
 
     - repoURL: https://github.com/Falo04/homelab.git
       targetRevision: main
-      path: charts/tailscale-node
+      path: charts/tailnet-node
       helm:
-        releaseName: opengym-tailscale
+        releaseName: opengym
         valuesObject:
-          pod:
-            fullnameOverride: tailscale
-          tailscale:
-            hostname: opengym
-            tcpForward:
-              - port: 443
-                targetPort: 443
-                service: opengym-ingress
-              - port: 80
-                targetPort: 80
-                service: opengym-ingress
+          hostname: opengym
           authSecret: tailscale-auth
-
-    - repoURL: https://github.com/Falo04/homelab.git
-      targetRevision: main
-      path: charts/service-ingress
-      helm:
-        releaseName: opengym-ingress
-        valuesObject:
-          pod:
-            fullnameOverride: opengym-ingress
-          host: gym.int.felixwallner.com
-          tlsSecret: opengym-tls
-          maxBodySize: 48m
-          backend:
-            service: opengym
-            port: 80
+          ingress:
+            maxBodySize: 48m
+            backend:
+              service: opengym
+              port: 80
 
   destination:
     server: https://kubernetes.default.svc

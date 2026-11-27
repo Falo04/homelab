@@ -7,7 +7,6 @@ resources:
   - namespace.yaml
   - oidc-secret.sops.yaml
   - tailscale-secret.sops.yaml
-  - argocd-cert.yaml
 
 components:
   - ../../../base/network-policy

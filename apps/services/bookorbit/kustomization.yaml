@@ -15,7 +15,6 @@ resources:
   - pvc.yaml
   - deployment.yaml
   - service.yaml
-  - bookorbit-cert.yaml
 
 components:
   - ../../../base/cnpg-backup
