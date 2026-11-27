@@ -1,15 +1,11 @@
-# PostgreSQL backup, restore and upgrades
+# PostgreSQL backup and restore
 
-Every Postgres database in the cluster runs as a
-[CloudNativePG](https://cloudnative-pg.io/) `Cluster`. Backups go to Garage
-(S3-compatible, on the NAS) through the
-[barman-cloud plugin](https://github.com/cloudnative-pg/plugin-barman-cloud).
+## Add backups to a cluster
 
-## Adding backups to a cluster
+Create the Garage bucket and key, then `cnpg-backup-secret.sops.yaml` producing
+Secret `cnpg-backup-s3` with `ACCESS_KEY_ID` and `ACCESS_SECRET_KEY`.
 
-Three edits in the app's directory.
-
-**1.** `backup-values.yaml`:
+`backup-values.yaml`:
 
 ```yaml
 ---
@@ -22,11 +18,7 @@ data:
   destinationPath: s3://<app>-bucket/
 ```
 
-The bucket must already exist in Garage, with an access key whose
-`ACCESS_KEY_ID` / `ACCESS_SECRET_KEY` are in `cnpg-backup-secret.sops.yaml`, a
-SopsSecret producing Secret `cnpg-backup-s3` (see [secrets.md](secrets.md)).
-
-**2.** `kustomization.yaml`, add the values file and the component:
+`kustomization.yaml`:
 
 ```yaml
 resources:
@@ -38,7 +30,7 @@ components:
   - ../../../base/cnpg-backup
 ```
 
-**3.** `postgres.yaml`, attach the plugin as a WAL archiver:
+`postgres.yaml`:
 
 ```yaml
 spec:
@@ -49,24 +41,19 @@ spec:
         barmanObjectName: garage-store
 ```
 
-## Restoring
+## Restore
 
-A restore never writes to the existing cluster. You create a **new** `Cluster`
-that bootstraps from the object store, which is also how you test that backups
-are good.
-
-`apps/infra/ntfy/postgres-test.yaml` is the worked example:
+Create a new `Cluster` (example: `apps/infra/ntfy/postgres-test.yaml`):
 
 ```yaml
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: ntfy-postgres-test
-  namespace: ntfy
+  name: <app>-postgres-test
+  namespace: <app>
 spec:
   instances: 1
-  # Must match the source cluster's major version.
-  imageName: ghcr.io/cloudnative-pg/postgresql:17.5
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.5 # same major as source
   storage:
     size: 2Gi
   bootstrap:
@@ -78,20 +65,12 @@ spec:
         name: barman-cloud.cloudnative-pg.io
         parameters:
           barmanObjectName: garage-store
-          serverName: ntfy-postgres
+          serverName: <app>-postgres # source cluster name
 ```
 
-Three fields carry all the weight:
-
-- `serverName`: the **source** cluster's name. Without it the plugin looks
-  for a backup under the new cluster's own name, which does not exist.
-- `imageName`: must match the source's major version.
-- No `plugins:` block, so the restored cluster does not archive. It cannot
-  contaminate the real cluster's backup chain.
+No `plugins:` block on the restored cluster.
 
 ### Point in time
-
-Add a `recoveryTarget` to stop somewhere other than the end of the archive:
 
 ```yaml
 bootstrap:
