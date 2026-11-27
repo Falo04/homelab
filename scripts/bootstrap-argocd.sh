@@ -5,7 +5,7 @@ set -euo pipefail
 # Only has to be close to the version pinned in
 # apps/infra/applications/argocd.yaml; Argo CD reconciles itself to whatever
 # that Application says on the first sync.
-CHART_VERSION="10.18.2"
+CHART_VERSION="10.20.0"
 NAMESPACE="argocd"
 # Must match apps/infra/applications/sops-secrets-operator.yaml.
 SOPS_NAMESPACE="sops-secrets-operator"
