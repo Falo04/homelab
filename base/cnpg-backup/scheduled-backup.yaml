@@ -1,5 +1,4 @@
-# CNPG cron is 6-field with seconds leading: this is 03:00 daily.
-# `spec.cluster.name` is filled in from the app's cnpg-backup-values ConfigMap.
+# 03:00 daily (CNPG cron has seconds first).
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup

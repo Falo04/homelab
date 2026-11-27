@@ -1,5 +1,3 @@
-# Pods in the same namespace may reach each other, e.g. the tailscale ->
-# nginx -> app chain of a tailnet-node release.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

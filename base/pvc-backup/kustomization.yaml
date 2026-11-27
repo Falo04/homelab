@@ -1,34 +1,5 @@
-# restic backups of one PersistentVolumeClaim.
-#
-# Usage, in the app's kustomization.yaml:
-#
-#   namespace: <app>
-#   resources:
-#     - pvc-backup-values.yaml   # see below
-#     - pvc-backup-secret.sops.yaml
-#     - pvc.yaml
-#   components:
-#     - ../../../base/pvc-backup
-#
-# and a pvc-backup-values.yaml next to it:
-#
-#   apiVersion: v1
-#   kind: ConfigMap
-#   metadata:
-#     name: pvc-backup-values
-#   data:
-#     claimName: <app>-data
-#     repository: s3:https://s3.nas.felixwallner.com/<app>-bucket/restic
-#     sqliteDatabases: "db/<app>.db"   # PVC-relative, space separated, may be ""
-#
-# The app brings the Garage credentials itself: a SopsSecret that produces
-# Secret `pvc-backup-s3` with `ACCESS_KEY_ID` / `ACCESS_SECRET_KEY` /
-# `RESTIC_PASSWORD`.
-#
-# Everything else (schedule, retention, images, resources) is a shared default
-# in cronjob.yaml; override per app with a `patches:` entry if one needs to
-# differ. One CronJob per namespace -- a second PVC in the same namespace needs
-# a nameSuffix patch.
+# Usage: docs/pvc-backup.md
+# A second PVC in the same namespace needs a nameSuffix patch.
 ---
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component

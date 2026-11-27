@@ -1,6 +1,3 @@
-# Namespaced, so the name is a constant across apps. Referenced from each
-# Cluster via `spec.plugins[].parameters.barmanObjectName`.
-# `destinationPath` is filled in from the app's cnpg-backup-values ConfigMap.
 ---
 apiVersion: barmancloud.cnpg.io/v1
 kind: ObjectStore
